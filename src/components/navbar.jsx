@@ -1,6 +1,8 @@
 import React, { useEffect } from "react";
 import { useState } from "react";
 import gsap from "gsap";
+// import { LogoutButton } from '../components/authCommon'
+
 import logo from '../image/logo.png';
 const emailRe = /^\S+@\S+\.\S+$/;
 const mobileRe = /^[0-9]{7,15}$/;
@@ -16,7 +18,7 @@ const Navbar = () => {
     const letters = document.querySelectorAll('.logo-text span');
     
     const tl = gsap.timeline({ defaults: { duration: 0.6, ease: "power2.out" } });
-    tl.from(logoIcon, { y: -20, rotation: -5, duration: 0.8, ease: "bounce.out" });
+    tl.from(logoIcon, { y: -8, rotation: -5, duration: 0.8, ease: "bounce.out" });
     tl.to(letters, { opacity: 1, y: 0, stagger: 0.08 }, "-=0.4");
 
     gsap.to(logoIcon, { y: "+=5", repeat: -1, yoyo: true, duration: 2, ease: "sine.inOut" });
@@ -47,13 +49,15 @@ const Navbar = () => {
           <span>b</span><span>u</span><span>d</span><span>d</span><span>i</span><span>e</span><span>s</span>
         </div>
       </div>
+     
 
       {/* Links */}
       <div className={`nav-links ${navLinksActive ? "active" : ""}`} style={styles.navLinks}>
         <a href="#" style={styles.navLink}>Home</a>
         <a href="#" style={styles.navLink}>About</a>
         <a href="#" style={styles.navLink}>Courses</a>
-        <a href="#" style={styles.navLink}>Contact</a>
+        <a style={styles.navLink}onClick={() => { localStorage.removeItem('token'); window.location.href='/' }}>Logout</a>
+      
       </div>
 
       {/* Hamburger */}
@@ -72,7 +76,7 @@ const styles = {
     display: 'flex',
     justifyContent: 'space-between',
     alignItems: 'center',
-    padding: '10px 20px',
+    padding: '5px 20px',
     background: '#0B3D91',
     color: '#fff',
     position: 'relative',
@@ -84,8 +88,8 @@ const styles = {
   },
   logoIcon: {
     width: '50px',
-    height: '50px',
-    marginRight: '10px',
+    height: '70px',
+    marginRight: '10px',    
   },
   logoText: {
     fontSize: '1.5rem',

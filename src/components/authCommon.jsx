@@ -12,5 +12,5 @@ export function useAuthForm(initial = {}) {
 }
 
 export function LogoutButton() {
-  return <button onClick={() => { localStorage.removeItem('token'); window.location.href='/' }}>Logout</button>
+  return <a  onClick={() => { localStorage.removeItem('token'); window.location.href='/' }}>Logout</a>
 }
