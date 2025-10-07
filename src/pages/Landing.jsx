@@ -222,7 +222,68 @@ FeatureCard.propTypes = {
   description: PropTypes.string.isRequired
 };
 
-// Floating Action Buttons Component
+// Circular Floating Action Button Component
+const CircularFloatingButton = ({ icon, text, color, hoverColor, onClick }) => (
+  <div
+    style={{
+      display: "flex",
+      flexDirection: "column",
+      alignItems: "center",
+      marginBottom: "20px",
+      cursor: "pointer"
+    }}
+    onClick={onClick}
+    onMouseOver={(e) => {
+      e.currentTarget.querySelector('.circle-button').style.backgroundColor = hoverColor;
+      e.currentTarget.querySelector('.circle-button').style.transform = "scale(1.1)";
+    }}
+    onMouseOut={(e) => {
+      e.currentTarget.querySelector('.circle-button').style.backgroundColor = color;
+      e.currentTarget.querySelector('.circle-button').style.transform = "scale(1)";
+    }}
+  >
+    <div
+      className="circle-button"
+      style={{
+        width: "70px",
+        height: "70px",
+        borderRadius: "50%",
+        backgroundColor: color,
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        boxShadow: "0 6px 15px rgba(0, 0, 0, 0.2)",
+        transition: "all 0.3s ease",
+        marginBottom: "8px",
+        border: "3px solid white"
+      }}
+    >
+      <span style={{ fontSize: "1.8rem" }}>{icon}</span>
+    </div>
+    <span
+      style={{
+        fontSize: "0.8rem",
+        fontWeight: "600",
+        color: "#495057",
+        textAlign: "center",
+        maxWidth: "80px",
+        lineHeight: "1.2"
+      }}
+    >
+      {text}
+    </span>
+  </div>
+);
+
+CircularFloatingButton.propTypes = {
+  icon: PropTypes.string.isRequired,
+  text: PropTypes.string.isRequired,
+  color: PropTypes.string.isRequired,
+  hoverColor: PropTypes.string.isRequired,
+  onClick: PropTypes.func.isRequired
+};
+
+// Floating Action Buttons Component with Circular Design
 const FloatingActionButtons = () => (
   <div
     style={{
@@ -232,32 +293,30 @@ const FloatingActionButtons = () => (
       transform: "translateY(-50%)",
       display: "flex",
       flexDirection: "column",
-      gap: "10px",
+      gap: "5px",
       zIndex: 1000,
-      backgroundColor: "rgba(255, 255, 255, 0.9)",
-      padding: "15px",
-      borderRadius: "12px",
-      boxShadow: "0 8px 25px rgba(0,0,0,0.15)",
+      backgroundColor: "rgba(255, 255, 255, 0.95)",
+      padding: "20px 15px",
+      borderRadius: "25px",
+      boxShadow: "0 10px 30px rgba(0,0,0,0.15)",
       backdropFilter: "blur(10px)",
-      border: "1px solid rgba(255, 255, 255, 0.2)"
+      border: "1px solid rgba(255, 255, 255, 0.3)"
     }}
   >
-    <ActionButton
+    {/* <CircularFloatingButton
+      icon="📝"
       text="Register"
       color="#007bff"
       hoverColor="#0056b3"
       onClick={() => window.open("http://localhost:5173/register", "_blank")}
-      icon="📝"
-      size="small"
     />
-    <ActionButton
+    <CircularFloatingButton
+      icon="🔑"
       text="Login"
       color="#28a745"
       hoverColor="#218838"
       onClick={() => window.open("http://localhost:5173/login", "_blank")}
-      icon="🔑"
-      size="small"
-    />
+    /> */}
   </div>
 );
 
@@ -314,7 +373,7 @@ export default function App() {
         position: "relative"
       }}
     >
-      {/* Floating Action Buttons on Left Side */}
+      {/* Circular Floating Action Buttons on Left Side */}
       <FloatingActionButtons />
 
       {/* Scroll to top button */}

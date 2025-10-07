@@ -1,6 +1,7 @@
 import { useState, useMemo, useEffect } from 'react'
 import api from '../utils/axios'
 import { useAuthForm } from '../components/authCommon'
+import logo from '../image/logoFull.png' // Import your logo image
 
 export default function Login() {
   const { form, onChange, error, setError, saveToken } = useAuthForm({ email: '', password: '' })
@@ -46,6 +47,9 @@ export default function Login() {
 
   return (
     <div className="container">
+      <div style={logoWrapperStyle}>
+        <img src={logo} alt="Logo" style={logoStyle} /> {/* Display logo here */}
+      </div>
       <h2 style={headerStyle}>Login</h2>
       <form onSubmit={submit} className="card" style={formStyle} noValidate>
         <div style={inputWrapperStyle}>
@@ -102,6 +106,16 @@ export default function Login() {
 }
 
 // Styles for various elements
+const logoWrapperStyle = {
+  textAlign: 'center',
+  marginBottom: '20px',
+}
+
+const logoStyle = {
+  width: '100px',  // Adjust size of logo
+  height: 'auto',
+}
+
 const headerStyle = {
   color: '#2C3E50',
   fontSize: '32px',
@@ -167,4 +181,3 @@ const linkStyle = {
   color: '#3498DB',
   textDecoration: 'none',
 }
-
