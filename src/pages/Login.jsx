@@ -1,7 +1,7 @@
 import { useState, useMemo, useEffect } from 'react'
 import api from '../utils/axios'
 import { useAuthForm } from '../components/authCommon'
-import logo from '../image/logoFull.png' // Import your logo image
+import logo from '../image/logofull.png' // Import your logo image
 
 export default function Login() {
   const { form, onChange, error, setError, saveToken } = useAuthForm({ email: '', password: '' })

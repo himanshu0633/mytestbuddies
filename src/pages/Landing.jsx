@@ -1,7 +1,8 @@
 import React, { useEffect, useState, useCallback } from "react";
 import PropTypes from "prop-types";
 import logoFull from "../image/logoFull.png";
-
+import { Link } from "react-router-dom"; // Import Link from react-router-dom
+import DiwaliQuizPoster from "../components/DiwaliQuizPoster";
 // Set countdown target date/time once outside component to avoid re-parsing.
 const countdownDate = new Date("October 10, 2025 23:59:59").getTime();
 
@@ -283,43 +284,6 @@ CircularFloatingButton.propTypes = {
   onClick: PropTypes.func.isRequired
 };
 
-// Floating Action Buttons Component with Circular Design
-const FloatingActionButtons = () => (
-  <div
-    style={{
-      position: "fixed",
-      left: "20px",
-      top: "50%",
-      transform: "translateY(-50%)",
-      display: "flex",
-      flexDirection: "column",
-      gap: "5px",
-      zIndex: 1000,
-      backgroundColor: "rgba(255, 255, 255, 0.95)",
-      padding: "20px 15px",
-      borderRadius: "25px",
-      boxShadow: "0 10px 30px rgba(0,0,0,0.15)",
-      backdropFilter: "blur(10px)",
-      border: "1px solid rgba(255, 255, 255, 0.3)"
-    }}
-  >
-    {/* <CircularFloatingButton
-      icon="📝"
-      text="Register"
-      color="#007bff"
-      hoverColor="#0056b3"
-      onClick={() => window.open("http://localhost:5173/register", "_blank")}
-    />
-    <CircularFloatingButton
-      icon="🔑"
-      text="Login"
-      color="#28a745"
-      hoverColor="#218838"
-      onClick={() => window.open("http://localhost:5173/login", "_blank")}
-    /> */}
-  </div>
-);
-
 export default function App() {
   const [isScrolled, setIsScrolled] = useState(false);
 
@@ -373,9 +337,6 @@ export default function App() {
         position: "relative"
       }}
     >
-      {/* Circular Floating Action Buttons on Left Side */}
-      <FloatingActionButtons />
-
       {/* Scroll to top button */}
       <button
         onClick={scrollToTop}
@@ -465,6 +426,7 @@ export default function App() {
             personalized reports, and amazing prizes!
           </p>
         </section>
+        <DiwaliQuizPoster />
 
         {/* Features Grid */}
         <section style={{ marginBottom: "40px" }}>
@@ -473,7 +435,7 @@ export default function App() {
             color: "#007bff", 
             marginBottom: "30px",
             fontSize: "2rem"
-          }}>
+          }} >
             🌟 What We Offer
           </h2>
           <div
@@ -493,6 +455,7 @@ export default function App() {
             ))}
           </div>
         </section>
+
 
         {/* Countdown Timer */}
         <section
@@ -520,68 +483,29 @@ export default function App() {
             Ready to Start Your Journey?
           </h3>
           <div style={{ display: "flex", justifyContent: "center", flexWrap: "wrap" }}>
-            <ActionButton
-              text="Register Now"
-              color="#007bff"
-              hoverColor="#0056b3"
-              onClick={() => window.open("http://localhost:5173/register", "_blank")}
-              icon="📝"
-            />
-            <ActionButton
-              text="Login"
-              color="#28a745"
-              hoverColor="#218838"
-              onClick={() => window.open("http://localhost:5173/login", "_blank")}
-              icon="🔑"
-            />
+            <Link to="/register">
+              <ActionButton
+                text="Register Now"
+                color="#007bff"
+                hoverColor="#0056b3"
+                icon="📝"
+              />
+            </Link>
+            <Link to="/login">
+              <ActionButton
+                text="Login"
+                color="#28a745"
+                hoverColor="#218838"
+                icon="🔑"
+              />
+            </Link>
           </div>
         </section>
 
-        {/* Important Dates */}
-        <section style={{ marginBottom: "40px" }}>
-          <h2 style={{ color: "#007bff", marginBottom: "20px", textAlign: "center" }}>📅 Important Dates</h2>
-          <div
-            style={{
-              backgroundColor: "white",
-              padding: "25px",
-              borderRadius: "8px",
-              boxShadow: "0 2px 8px rgba(0,0,0,0.1)"
-            }}
-          >
-            {[
-              { date: "October 10th - 15th", description: "Join daily quizzes and test your knowledge." },
-              { date: "October 10th", description: "Special Offer Ends! Register for just ₹100 (originally ₹250)." },
-              { date: "October 16th", description: "Final round of testing for top students; announce Top 10 prize winners." }
-            ].map((item, index) => (
-              <div
-                key={index}
-                style={{
-                  display: "flex",
-                  alignItems: "flex-start",
-                  padding: "15px 0",
-                  borderBottom: index < 2 ? "1px solid #e9ecef" : "none"
-                }}
-              >
-                <div
-                  style={{
-                    fontWeight: "bold",
-                    minWidth: "180px",
-                    color: "#495057",
-                    fontSize: "1rem"
-                  }}
-                >
-                  {item.date}
-                </div>
-                <div style={{ color: "#6c757d", flex: 1 }}>
-                  {item.description}
-                </div>
-              </div>
-            ))}
-          </div>
-        </section>
+
 
         {/* How to Participate */}
-        <section style={{ marginBottom: "40px" }}>
+      {/* <section style={{ marginBottom: "40px" }}>
           <h2 style={{ color: "#007bff", marginBottom: "20px", textAlign: "center" }}>🎯 How to Participate</h2>
           <div
             style={{
@@ -629,7 +553,7 @@ export default function App() {
               </div>
             ))}
           </div>
-        </section>
+        </section> */}
       </main>
 
       <footer
@@ -643,7 +567,6 @@ export default function App() {
           backgroundColor: "white",
           borderRadius: "8px"
         }}
-        aria-label="Footer copyright information"
       >
         <p style={{ margin: "0 0 10px 0" }}>
           © 2025 MyTestBuddies. All rights reserved.
