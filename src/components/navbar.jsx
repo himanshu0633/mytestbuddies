@@ -53,9 +53,9 @@ const Navbar = () => {
 
       {/* Links */}
       <div className={`nav-links ${navLinksActive ? "active" : ""}`} style={styles.navLinks}>
-        <a href="#" style={styles.navLink}>Home</a>
+        {/* <a href="#" style={styles.navLink}>Home</a>
         <a href="#" style={styles.navLink}>About</a>
-        <a href="#" style={styles.navLink}>Courses</a>
+        <a href="#" style={styles.navLink}>Courses</a> */}
         <a style={styles.navLink}onClick={() => { localStorage.removeItem('token'); window.location.href='/' }}>Logout</a>
       
       </div>

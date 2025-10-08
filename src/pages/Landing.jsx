@@ -5,7 +5,7 @@ import { Link } from "react-router-dom";
 import DiwaliQuizPoster from "../components/DiwaliQuizPoster";
 
 // Set countdown target date/time once outside component to avoid re-parsing.
-const countdownDate = new Date("October 10, 2025 23:59:59").getTime();
+const countdownDate = new Date("October 15, 2025 23:59:59").getTime();
 
 // Enhanced button component with gradient and modern styling
 const ActionButton = ({ text, color, hoverColor, onClick, icon, disabled, size = "normal", gradient = false }) => (
@@ -219,7 +219,7 @@ function CountdownTimer() {
           fontWeight: "500"
         }}
       >
-        Offer ends: October 10, 2025
+        Offer ends: October 15, 2025
       </div>
     </div>
   );

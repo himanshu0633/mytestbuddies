@@ -3,6 +3,7 @@ import { useNavigate, Link } from 'react-router-dom';
 import api from '../utils/axios';
 import { useAuthForm } from '../components/authCommon';
 import logo from '../image/logofull.png';
+import qrCodeimage from '../image/qr.png';
 
 const emailRe = /^\S+@\S+\.\S+$/;
 const mobileRe = /^[0-9]{7,15}$/;
@@ -305,7 +306,7 @@ export default function Register() {
           <div style={formStyle}>
             <h3 style={stepTitleStyle}>Select Your Profile 🎯</h3>
             <p style={stepSubtitleStyle}>Choose how you'll be using MyTestBuddies</p>
-            
+
             <div style={userTypeContainerStyle}>
               <div
                 style={{
@@ -401,22 +402,23 @@ export default function Register() {
                     <span style={methodIconStyle}>📱</span>
                     UPI Payment
                   </div>
-                  <div style={methodOptionStyle}>
+                  {/* <div style={methodOptionStyle}>
                     <span style={methodIconStyle}>💳</span>
                     Credit/Debit Card
                   </div>
                   <div style={methodOptionStyle}>
                     <span style={methodIconStyle}>🏦</span>
                     Net Banking
-                  </div>
+                  </div> */}
                 </div>
               </div>
 
               <div style={qrSectionStyle}>
                 <h4 style={qrTitleStyle}>Scan QR Code to Pay</h4>
                 <div style={qrPlaceholderStyle}>
-                  {/* Replace with actual QR code image */}
-                  <div style={qrCodeStyle}>QR CODE</div>
+                  {/* <div style={qrCodeStyle}> */}
+                    <img src={qrCodeimage} style={{ width: '200px', height: '200px' }} />
+                  {/* </div> */}
                   <p style={qrInstructionsStyle}>
                     Scan this QR code with any UPI app to complete payment
                   </p>
@@ -473,17 +475,17 @@ export default function Register() {
         {step === 4 && (
           <div style={formStyle}>
             <h3 style={stepTitleStyle}>Almost There! 🎉</h3>
-            
+
             <div style={paymentStatusStyle}>
-              {paymentStatus === "pending" ? (
+              {/* {paymentStatus === "pending" ? (
                 <div style={processingStyle}>
                   <div style={spinnerStyle}></div>
                   <h4 style={statusTitleStyle}>Processing Your Payment</h4>
                   <p style={statusTextStyle}>
                     Please wait while we verify your payment details...
                   </p>
-                  <button 
-                    onClick={submitPayment} 
+                  <button
+                    onClick={submitPayment}
                     disabled={loading}
                     style={{
                       ...buttonStyle,
@@ -500,7 +502,7 @@ export default function Register() {
                     )}
                   </button>
                 </div>
-              ) : (
+              ) : ( */}
                 <div style={successStyle}>
                   <div style={successIconStyle}>✅</div>
                   <h4 style={statusTitleStyle}>Payment Successful!</h4>
@@ -513,7 +515,7 @@ export default function Register() {
                     </Link>
                   </div>
                 </div>
-              )}
+              {/* )} */}
             </div>
           </div>
         )}
@@ -999,8 +1001,8 @@ const qrPlaceholderStyle = {
 }
 
 const qrCodeStyle = {
-  width: '150px',
-  height: '150px',
+  width: '200px', // Adjust the width as needed
+  height: '200px', // Adjust the height as needed
   background: '#ecf0f1',
   border: '2px dashed #bdc3c7',
   borderRadius: '10px',
@@ -1009,8 +1011,10 @@ const qrCodeStyle = {
   justifyContent: 'center',
   margin: '0 auto 15px',
   color: '#7f8c8d',
-  fontWeight: 'bold'
-}
+  fontWeight: 'bold',
+  overflow: 'hidden', // Ensure the QR code is contained within the box
+};
+
 
 const qrInstructionsStyle = {
   fontSize: '12px',

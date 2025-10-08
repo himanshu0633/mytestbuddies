@@ -249,7 +249,7 @@ export default function DiwaliQuizCard({
                       textAlign: { xs: 'center', sm: 'left' }
                     }}
                   >
-                    Diwali Quiz Contest 2024
+                    Mega Quiz Contest 2025
                   </Typography>
                   
                   <Typography 
@@ -262,7 +262,8 @@ export default function DiwaliQuizCard({
                       fontSize: { xs: '0.9rem', sm: '1.1rem' }
                     }}
                   >
-                    Join the festive celebration on <strong>MyTestBuddies</strong> — test your knowledge and win incredible prizes worth lakhs!
+                    Join the festive celebration on <strong>MyTestBuddies</strong> — test your knowledge and win incredible prizes worth lakhs! <br />
+                     Mega Quiz on 10th To 16th of October
                   </Typography>
                 </Box>
 
@@ -310,7 +311,7 @@ export default function DiwaliQuizCard({
                             fontSize: { xs: '0.8rem', sm: '0.9rem' }
                           }}
                         >
-                          Diwali Special Price
+                          Mega Special Price
                         </Typography>
                         <Typography 
                           variant={isMobile ? "h4" : "h3"}
@@ -438,9 +439,10 @@ export default function DiwaliQuizCard({
                 <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
                   {[
                     { step: '1', text: 'Register with Diwali discount' },
-                    { step: '2', text: 'Complete quiz before deadline' },
-                    { step: '3', text: 'Check leaderboard for results' },
-                    { step: '4', text: 'Claim your Diwali prizes!' }
+                    { step: '2', text: 'Your Mega Quiz Test will be available after 12 hours!' },
+                    
+                    { step: '3', text: 'Check leaderboard on 17th of October for results' },
+                    { step: '4', text: 'Claim your Mega Quiz prizes!' }
                   ].map((item, index) => (
                     <Box key={index} sx={{ display: 'flex', alignItems: 'flex-start', gap: 1.5 }}>
                       <Box sx={{
@@ -505,7 +507,7 @@ export default function DiwaliQuizCard({
               fontSize: { xs: '1.25rem', sm: '1.5rem', md: '2rem' }
             }}
           >
-            🏆 Diwali Contest Prizes
+            🏆 Mega Contest Prizes
           </Typography>
           <IconButton
             aria-label="close"
