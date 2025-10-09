@@ -5,28 +5,22 @@ import { useAuthForm } from '../components/authCommon';
 import logo from '../image/logofull.png';
 import qrCodeimage from '../image/qr.png';
 
-const emailRe = /^\S+@\S+\.\S+$/;
-const mobileRe = /^[0-9]{7,15}$/;
-
 export default function Register() {
-  const { form, onChange, error, setError, saveToken } = useAuthForm({
+  const { form, onChange, saveToken } = useAuthForm({
     name: '',
     email: '',
     password: '',
     mobile: '',
     userType: '',
     qrCode: '',
+    utr: '',
   });
-  const [fieldErr, setFieldErr] = useState({});
+
   const [loading, setLoading] = useState(false);
   const [step, setStep] = useState(1);
   const [userType, setUserType] = useState('');
-  // console.log('userType:', userType);
   const [qrCode, setQrCode] = useState('');
   const [utr, setUtr] = useState('');
-
-  const [paymentStatus, setPaymentStatus] = useState('pending');
-  const [showPassword, setShowPassword] = useState(false);
   const navigate = useNavigate();
 
   const onMobileChange = (e) => {
@@ -34,168 +28,75 @@ export default function Register() {
     onChange({ target: { name: 'mobile', value: onlyDigits } });
   };
 
-  const validate = (values) => {
-    const fe = {};
-    if (!values.name?.trim()) fe.name = 'Name is required';
-    if (!values.password) fe.password = 'Password is required';
-    if (values.password && values.password.length < 6) fe.password = 'Password must be at least 6 characters';
-    if (!values.email && !values.mobile) {
-      fe.email = 'Provide email or mobile';
-      fe.mobile = 'Provide email or mobile';
-    }
-    if (values.email && !emailRe.test(values.email.trim())) {
-      fe.email = 'Invalid email format';
-    }
-    if (values.mobile && !mobileRe.test(values.mobile.trim())) {
-      fe.mobile = 'Mobile must be 7–15 digits';
-    }
-    return fe;
-  };
-
-  const isDisabled = Object.keys(validate(form)).length > 0 || loading;
-
   const submitStep1 = (e) => {
     e.preventDefault();
-    const fe = validate(form);
-    setFieldErr(fe);
-    if (Object.keys(fe).length) return;
+    console.log('Step 1 data:', form); // Log the data at step 1
     setStep(2);
   };
 
-const submitStep2 = () => {
-  if (userType === '') {
-    setFieldErr({ ...fieldErr, userType: 'Please select user type' });
-    return;
-  }
-
-  // Set the userType in the form before moving to step 3
-  onChange({ target: { name: 'userType', value: userType } });
-
-  setStep(3);
-};
-
-
+  const submitStep2 = () => {
+    onChange({ target: { name: 'userType', value: userType } });
+    console.log('Step 2 data - User Type:', userType); // Log the selected user type
+    setStep(3);
+  };
 
   const submitStep3 = () => {
-    if (!utr || utr.length < 16) {
-      setFieldErr({ ...fieldErr, utr: 'Please enter a valid transaction ID (at least 16 characters)' });
-      return;
-    }
-
     onChange({ target: { name: 'utr', value: utr } });
+    console.log('Step 3 data - UTR:', utr); // Log the entered UTR
     setStep(4);
   };
 
-const submitPayment = async () => {
-  setLoading(true);
-  const formData = new FormData();
-console.log('Submitting payment with:', { ...form, utr, qrCode });
-  formData.append('name', form.name);
-  formData.append('email', form.email);
-  formData.append('mobile', form.mobile);
-  formData.append('password', form.password);
-  formData.append('userType', form.userType);
-  formData.append('utr', utr);
+  const submitPayment = async () => {
+    setLoading(true);
+    const formData = new FormData();
+    formData.append('name', form.name);
+    formData.append('email', form.email);
+    formData.append('mobile', form.mobile);
+    formData.append('password', form.password);
+    formData.append('userType', form.userType);
+    formData.append('utr', utr);
 
-  if (qrCode && qrCode instanceof File) {
-    formData.append('proofOfPayment', qrCode);
-  }
+    if (qrCode && qrCode instanceof File) {
+      formData.append('proofOfPayment', qrCode);
+    }
 
-  try {
-    setPaymentStatus('paid');
-    
-    // Perform the API call
-    await api.post('/auth/register', formData, {
-  headers: {
-    'Content-Type': 'multipart/form-data',
-  },
-  credentials: 'include',  // This ensures cookies are sent with the request
-});
+    console.log('Submitting payment with data:', formData); // Log form data before sending request
 
+    try {
+      await api.post('/auth/register', formData, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      });
 
-    saveToken('mock-token');
-    setLoading(false);
-    Response.status
-    navigate('/login');
-  } catch (error) {
-    console.error('Registration error:', error);
-    setError('Registration failed. Please try again.');
-    setLoading(false);
-    navigate('/login');
-
-  }
-};
-
-
-
-  const handleLogoClick = () => {
-    navigate('/');
-  };
-
-  const goToStep = (stepNumber) => {
-    if (stepNumber < step) {
-      setStep(stepNumber);
+      saveToken('mock-token');
+      setLoading(false);
+      navigate('/login');
+    } catch (error) {
+      console.error('Registration error:', error);
+      setLoading(false);
+      navigate('/login');
     }
   };
 
-  const ProgressSteps = () => (
-    <div style={progressContainerStyle}>
-      {[1, 2, 3, 4].map((stepNumber) => (
-        <div key={stepNumber} style={progressStepStyle}>
-          <div
-            style={{
-              ...progressCircleStyle,
-              ...(stepNumber === step ? progressCircleActiveStyle : {}),
-              ...(stepNumber < step ? progressCircleCompletedStyle : {}),
-            }}
-            onClick={() => goToStep(stepNumber)}
-          >
-            {stepNumber < step ? '✓' : stepNumber}
-          </div>
-          <div style={progressLabelStyle}>
-            {stepNumber === 1 && 'Basic Info'}
-            {stepNumber === 2 && 'User Type'}
-            {stepNumber === 3 && 'Payment'}
-            {stepNumber === 4 && 'Complete'}
-          </div>
-          {stepNumber < 4 && <div style={progressLineStyle}></div>}
-        </div>
-      ))}
-    </div>
-  );
+  const handleLogoClick = () => navigate('/');
 
   return (
     <div style={containerStyle}>
-      {/* Background Decoration */}
       <div style={backgroundDecorationStyle}>
         <div style={floatingCircle1Style}></div>
         <div style={floatingCircle2Style}></div>
       </div>
 
       <div style={cardStyle}>
-        {/* Logo Section */}
         <div style={logoSectionStyle} onClick={handleLogoClick}>
           <img src={logo} alt="MyTestBuddies Logo" style={logoStyle} />
           <h1 style={brandNameStyle}>MyTestBuddies</h1>
         </div>
 
-        {/* Progress Steps */}
-        <ProgressSteps />
-
-        {/* Welcome Section */}
-        <div style={welcomeSectionStyle}>
-          <h2 style={headerStyle}>Create Your Account 🚀</h2>
-          <p style={subtitleStyle}>Join thousands of students preparing for competitive exams</p>
-        </div>
-
-        {/* Step 1: Basic Info */}
+        {/* Step 1 */}
         {step === 1 && (
           <form onSubmit={submitStep1} style={formStyle} noValidate>
             <div style={inputContainerStyle}>
-              <label htmlFor="name" style={labelStyle}>
-                <span style={labelIconStyle}>👤</span>
-                Full Name
-              </label>
+              <label htmlFor="name" style={labelStyle}>👤 Full Name</label>
               <div style={inputWrapperStyle}>
                 <input
                   id="name"
@@ -203,31 +104,14 @@ console.log('Submitting payment with:', { ...form, utr, qrCode });
                   name="name"
                   value={form.name}
                   onChange={onChange}
-                  autoComplete="name"
-                  required
-                  style={{
-                    ...inputStyle,
-                    border: fieldErr.name ? '2px solid #e74c3c' : form.name ? '2px solid #2ecc71' : '2px solid #e0e0e0',
-                    paddingLeft: '45px',
-                  }}
+                  style={inputStyle}
                   placeholder="Enter your full name"
-                  aria-invalid={!!fieldErr.name}
-                  aria-describedby="name-err"
                 />
-                <span style={inputIconStyle}>📝</span>
               </div>
-              {fieldErr.name && (
-                <small id="name-err" style={errorMessageStyle}>
-                  ⚠️ {fieldErr.name}
-                </small>
-              )}
             </div>
 
             <div style={inputContainerStyle}>
-              <label htmlFor="email" style={labelStyle}>
-                <span style={labelIconStyle}>📧</span>
-                Email Address
-              </label>
+              <label htmlFor="email" style={labelStyle}>📧 Email Address</label>
               <div style={inputWrapperStyle}>
                 <input
                   id="email"
@@ -235,71 +119,29 @@ console.log('Submitting payment with:', { ...form, utr, qrCode });
                   name="email"
                   value={form.email}
                   onChange={onChange}
-                  autoComplete="email"
-                  style={{
-                    ...inputStyle,
-                    borderColor: fieldErr.email ? '#e74c3c' : form.email ? '#2ecc71' : '#e0e0e0',
-                    paddingLeft: '45px',
-                  }}
+                  style={inputStyle}
                   placeholder="Enter your email address"
-                  aria-invalid={!!fieldErr.email}
-                  aria-describedby="email-err"
                 />
-                <span style={inputIconStyle}>✉️</span>
               </div>
-              {fieldErr.email && (
-                <small id="email-err" style={errorMessageStyle}>
-                  ⚠️ {fieldErr.email}
-                </small>
-              )}
             </div>
 
             <div style={inputContainerStyle}>
-              <label htmlFor="password" style={labelStyle}>
-                <span style={labelIconStyle}>🔒</span>
-                Password
-              </label>
+              <label htmlFor="password" style={labelStyle}>🔒 Password</label>
               <div style={inputWrapperStyle}>
                 <input
                   id="password"
-                  type={showPassword ? 'text' : 'password'}
+                  type="password"
                   name="password"
                   value={form.password}
                   onChange={onChange}
-                  autoComplete="new-password"
-                  required
-                  style={{
-                    ...inputStyle,
-                    borderColor: fieldErr.password ? '#e74c3c' : form.password ? '#2ecc71' : '#e0e0e0',
-                    paddingLeft: '45px',
-                    paddingRight: '45px',
-                  }}
-                  placeholder="Create a strong password"
-                  aria-invalid={!!fieldErr.password}
-                  aria-describedby="pass-err"
+                  style={inputStyle}
+                  placeholder="Create a password"
                 />
-                <span style={inputIconStyle}>🔐</span>
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  style={passwordToggleStyle}
-                  aria-label={showPassword ? 'Hide password' : 'Show password'}
-                >
-                  {showPassword ? '🙈' : '👁️'}
-                </button>
               </div>
-              {fieldErr.password && (
-                <small id="pass-err" style={errorMessageStyle}>
-                  ⚠️ {fieldErr.password}
-                </small>
-              )}
             </div>
 
             <div style={inputContainerStyle}>
-              <label htmlFor="mobile" style={labelStyle}>
-                <span style={labelIconStyle}>📱</span>
-                Whatsapp Number
-              </label>
+              <label htmlFor="mobile" style={labelStyle}>📱 WhatsApp Number</label>
               <div style={inputWrapperStyle}>
                 <input
                   id="mobile"
@@ -307,243 +149,53 @@ console.log('Submitting payment with:', { ...form, utr, qrCode });
                   name="mobile"
                   value={form.mobile}
                   onChange={onMobileChange}
-                  inputMode="numeric"
-                  pattern="[0-9]{7,15}"
-                  placeholder="Enter your mobile number"
-                  autoComplete="tel"
-                  style={{
-                    ...inputStyle,
-                    borderColor: fieldErr.mobile ? '#e74c3c' : form.mobile ? '#2ecc71' : '#e0e0e0',
-                    paddingLeft: '45px',
-                  }}
-                  aria-invalid={!!fieldErr.mobile}
-                  aria-describedby="mobile-err"
+                  style={inputStyle}
+                  placeholder="Enter mobile number"
                 />
-                <span style={inputIconStyle}>📞</span>
               </div>
-              {fieldErr.mobile && (
-                <small id="mobile-err" style={errorMessageStyle}>
-                  ⚠️ {fieldErr.mobile}
-                </small>
-              )}
             </div>
 
-            <button
-              type="submit"
-              disabled={isDisabled}
-              style={{
-                ...buttonStyle,
-                ...(isDisabled ? disabledButtonStyle : activeButtonStyle),
-              }}
-            >
-              <span style={buttonIconStyle}>➡️</span>
-              Continue to User Type
+            <button type="submit" style={buttonStyle}>
+              Continue to User Type → 
             </button>
           </form>
         )}
 
-        {/* Step 2: User Type Selection */}
+        {/* Step 2 */}
         {step === 2 && (
           <div style={formStyle}>
-            <h3 style={stepTitleStyle}>Select Your Profile 🎯</h3>
-            <p style={stepSubtitleStyle}>Choose how you'll be using MyTestBuddies</p>
-
-            <div style={userTypeContainerStyle}>
-              <div
-  style={{
-    ...userTypeCardStyle,
-    ...(userType === 'student' ? userTypeCardActiveStyle : {}),
-  }}
-  onClick={() => setUserType('student')}
->
-  <div style={userTypeIconStyle}>🎓</div>
-  <h4 style={userTypeTitleStyle}>Student</h4>
-  <p style={userTypeDescriptionStyle}>
-    Preparing for competitive exams, school/college tests, and academic goals
-  </p>
-</div>
-
-{/* <div
-  style={{
-    ...userTypeCardStyle,
-    ...(userType === 'general' ? userTypeCardActiveStyle : {}),
-  }}
-  onClick={() => setUserType('general')}
->
-  <div style={userTypeIconStyle}>👥</div>
-  <h4 style={userTypeTitleStyle}>General User</h4>
-  <p style={userTypeDescriptionStyle}>
-    Lifelong learner, professional, or anyone interested in testing knowledge
-  </p>
-</div> */}
-
-
-              <div
-                style={{
-                  ...userTypeCardStyle,
-                  ...(userType === 'general' ? userTypeCardActiveStyle : {}),
-                }}
-                onClick={() => setUserType('general')}
-              >
-                <div style={userTypeIconStyle}>👥</div>
-                <h4 style={userTypeTitleStyle}>General User</h4>
-                <p style={userTypeDescriptionStyle}>
-                  Lifelong learner, professional, or anyone interested in testing knowledge
-                </p>
-                <div style={userTypeFeaturesStyle}>
-                  <span style={featureStyle}>✓ Skill Development</span>
-                  <span style={featureStyle}>✓ Knowledge Testing</span>
-                  <span style={featureStyle}>✓ Personal Growth</span>
-                </div>
-              </div>
-            </div>
-
-            {fieldErr.userType && (
-              <div style={errorAlertStyle}>
-                ⚠️ {fieldErr.userType}
-              </div>
-            )}
-
-            <div style={buttonGroupStyle}>
-              <button
-                onClick={() => setStep(1)}
-                style={secondaryButtonStyle}
-              >
-                ← Back
-              </button>
-              <button
-                onClick={submitStep2}
-                disabled={!userType}
-                style={{
-                  ...buttonStyle,
-                  ...(!userType ? disabledButtonStyle : activeButtonStyle),
-                }}
-              >
-                Continue to Payment →
-              </button>
-            </div>
+            <h3>Select Your Profile 🎯</h3>
+            <button onClick={() => setUserType('student')}>Student</button>
+            <button onClick={() => setUserType('general')}>General User</button>
+            <button onClick={submitStep2}>Continue to Payment →</button>
           </div>
         )}
 
-        {/* Step 3: Payment */}
+        {/* Step 3 */}
         {step === 3 && (
           <div style={formStyle}>
-            <h3 style={stepTitleStyle}>Complete Payment 💰</h3>
-            <p style={stepSubtitleStyle}>Special Diwali offer - Limited time discount!</p>
-
-            <div style={paymentCardStyle}>
-              <div style={pricingStyle}>
-                <div style={originalPriceStyle}>
-                  <span style={originalPriceTextStyle}>Original Price: </span>
-                  <span style={priceStrikeStyle}>₹250</span>
-                </div>
-                <div style={discountedPriceStyle}>
-                  <span style={discountedPriceTextStyle}>Diwali Offer: </span>
-                  <span style={discountedPriceAmountStyle}>₹100</span>
-                </div>
-                <div style={savingsStyle}>
-                  🎉 You save ₹150 (60% OFF)
-                </div>
-              </div>
-
-              <div style={paymentMethodsStyle}>
-                <h4 style={methodsTitleStyle}>Payment Methods</h4>
-                <div style={methodOptionsStyle}>
-                  <div style={methodOptionStyle}>
-                    <span style={methodIconStyle}>📱</span>
-                    UPI Payment
-                  </div>
-                </div>
-              </div>
-
-              <div style={qrSectionStyle}>
-                <h4 style={qrTitleStyle}>Scan QR Code to Pay</h4>
-                <div style={qrPlaceholderStyle}>
-                  <img src={qrCodeimage} style={{ width: '200px', height: '200px' }} />
-                  <p style={qrInstructionsStyle}>
-                    Scan this QR code with any UPI app to complete payment
-                  </p>
-                </div>
-              </div>
-
-              <div style={uploadSectionStyle}>
-                <h4 style={uploadTitleStyle}>Upload Payment Proof</h4>
-                <input
-                  type="file"
-                  onChange={(e) => setQrCode(e.target.files[0])}
-                  style={fileInputStyle}
-                  accept="image/*,.pdf"
-                />
-                <p style={uploadHintStyle}>OR</p>
-                <h5 style={utrTitleStyle}>Enter Transaction ID (UTR)</h5>
-                <input
-                  type="text"
-                  placeholder="Enter your 16-digit UTR number"
-                  onChange={(e) => setUtr(e.target.value)}
-                  style={inputStyle}
-                />
-              </div>
-
-              {fieldErr.utr && (
-                <div style={errorAlertStyle}>
-                  ⚠️ {fieldErr.utr}
-                </div>
-              )}
-
-              <div style={buttonGroupStyle}>
-                <button
-                  onClick={() => setStep(2)}
-                  style={secondaryButtonStyle}
-                >
-                  ← Back
-                </button>
-                <button
-                  onClick={submitPayment}
-                  disabled={!utr || loading}
-                  style={{
-                    ...buttonStyle,
-                    ...(!utr ? disabledButtonStyle : activeButtonStyle),
-                  }}
-                >
-                  Verify Payment →
-                </button>
-              </div>
+            <h3>Complete Payment 💰</h3>
+            <div>
+              <img src={qrCodeimage} alt="QR" />
+              <input type="file" onChange={(e) => setQrCode(e.target.files[0])} />
+              <input type="text" placeholder="Enter UTR" onChange={(e) => setUtr(e.target.value)} />
+              <button onClick={submitPayment}>Verify Payment →</button>
             </div>
           </div>
         )}
 
-        {/* Step 4: Payment Processing */}
+        {/* Step 4 */}
         {step === 4 && (
           <div style={formStyle}>
-            <h3 style={stepTitleStyle}>Almost There! 🎉</h3>
-
-            <div style={paymentStatusStyle}>
-              <div style={successStyle}>
-                <div style={successIconStyle}>✅</div>
-                <h4 style={statusTitleStyle}>Payment Successful!</h4>
-                <p style={statusTextStyle}>
-                  Your registration is complete. Welcome to MyTestBuddies!
-                </p>
-                <div style={successActionsStyle}>
-                  <Link to="/login" style={successButtonStyle}>
-                    Proceed to Login →
-                  </Link>
-                </div>
-              </div>
-            </div>
+            <h3>Registration Complete 🎉</h3>
+            <Link to="/login">Proceed to Login →</Link>
           </div>
         )}
-
-        {/* Login Link */}
-        <div style={loginLinkStyle}>
-          <p style={loginTextStyle}>
-            Already have an account? <Link to="/login" style={linkStyle}>Sign in here</Link>
-          </p>
-        </div>
       </div>
     </div>
   );
 }
+
 
 
   // Enhanced Styles
@@ -627,13 +279,13 @@ console.log('Submitting payment with:', { ...form, utr, qrCode });
   }
 
   // Progress Steps Styles
-  const progressContainerStyle = {
-    display: 'flex',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: '30px',
-    position: 'relative'
-  }
+  // const progressContainerStyle = {
+  //   display: 'flex',
+  //   justifyContent: 'space-between',
+  //   alignItems: 'center',
+  //   marginBottom: '30px',
+  //   position: 'relative'
+  // }
 
   const progressStepStyle = {
     display: 'flex',

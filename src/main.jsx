@@ -1,6 +1,6 @@
 import React from 'react'
 import { createRoot } from 'react-dom/client'
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
+import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom'
 import Landing from './pages/Landing.jsx'
 import Login from './pages/Login.jsx'
 import Register from './pages/Register.jsx'
@@ -9,9 +9,21 @@ import JoinQuiz from './pages/JoinQuiz.jsx'
 import AdminPayments from './pages/AdminPayments.jsx'
 import './styles.css'
 
+// Custom component to log route changes
+function RouteLogger() {
+  const location = useLocation();
+
+  React.useEffect(() => {
+    console.log('Current route:', location.pathname); // Log the current route
+  }, [location]);
+
+  return null; // This component doesn’t render anything
+}
+
 function App() {
   return (
     <BrowserRouter>
+      <RouteLogger /> {/* Log route changes */}
       <Routes>
         <Route path="/" element={<Landing />} />
         <Route path="/login" element={<Login />} />
