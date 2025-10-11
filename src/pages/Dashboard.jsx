@@ -4,7 +4,6 @@ import { Link } from 'react-router-dom'
 import { LogoutButton } from '../components/authCommon'
 import Navbar from '../components/navbar'
 
-
 // Simple icon components using emojis
 const QuizIcon = () => <span style={{ fontSize: '20px' }}>📝</span>
 const TrophyIcon = () => <span style={{ fontSize: '20px' }}>🏆</span>
@@ -29,6 +28,7 @@ export default function Dashboard() {
   })
   const [upcomingTests, setUpcomingTests] = useState([])
   const [notifications, setNotifications] = useState([])
+  const [hoveredButton, setHoveredButton] = useState(null) // State for hover effect
 
   useEffect(() => {
     (async () => {
@@ -88,6 +88,15 @@ export default function Dashboard() {
     }
   }
 
+  // Handlers for hover effect
+  const handleMouseEnter = (button) => {
+    setHoveredButton(button)
+  }
+
+  const handleMouseLeave = () => {
+    setHoveredButton(null)
+  }
+
   return (
     <>
       <Navbar />
@@ -133,9 +142,41 @@ export default function Dashboard() {
           </div>
         </div>
 
-        
-
-        
+        {/* Contact Support Section */}
+        <div style={contactSupportStyle}>
+          <h3 style={contactSupportTitleStyle}>Contact Support</h3>
+          <p style={contactSupportTextStyle}>If you have any questions or need assistance, feel free to reach out to us through any of the following channels:</p>
+          
+          <div style={contactButtonContainerStyle}>
+            <a 
+              href="https://www.instagram.com/mytestbuddies.shop?igsh=bGs0aWtpNXg1N3dt" 
+              target="_blank"
+              style={hoveredButton === 'instagram' ? {...contactButtonStyle, background: '#6a42a8'} : contactButtonStyle}
+              onMouseEnter={() => handleMouseEnter('instagram')} 
+              onMouseLeave={handleMouseLeave}
+            >
+              Instagram
+            </a>
+            <a 
+              href="https://t.me/mytestbuddies" 
+              target="_blank"
+              style={hoveredButton === 'telegram' ? {...contactButtonStyle, background: '#6a42a8'} : contactButtonStyle}
+              onMouseEnter={() => handleMouseEnter('telegram')} 
+              onMouseLeave={handleMouseLeave}
+            >
+              Telegram
+            </a>
+            <a 
+              href="https://whatsapp.com/channel/0029VbBqVVSInlqPiW153j23" 
+              target="_blank"
+              style={hoveredButton === 'whatsapp' ? {...contactButtonStyle, background: '#6a42a8'} : contactButtonStyle}
+              onMouseEnter={() => handleMouseEnter('whatsapp')} 
+              onMouseLeave={handleMouseLeave}
+            >
+              WhatsApp
+            </a>
+          </div>
+        </div>
       </div>
     </>
   )
@@ -248,428 +289,43 @@ const badgeStyle = {
   gap: '5px'
 }
 
-const statsGridStyle = {
-  display: 'grid',
-  gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))',
-  gap: '20px',
-  marginBottom: '40px'
-}
-
-const statCardStyle = {
-  padding: '30px 20px',
-  borderRadius: '15px',
-  color: 'white',
-  textAlign: 'center',
-  boxShadow: '0 8px 25px rgba(0, 0, 0, 0.15)',
-  transition: 'transform 0.3s ease',
-  cursor: 'pointer'
-}
-
-const statNumberStyle = {
-  fontSize: '2.5rem',
-  fontWeight: 'bold',
-  margin: '10px 0'
-}
-
-const statLabelStyle = {
-  fontSize: '1rem',
-  opacity: 0.9
-}
-
-const mainContentStyle = {
-  display: 'grid',
-  gridTemplateColumns: '2fr 1fr',
-  gap: '30px',
-  marginBottom: '40px'
-}
-
-const leftColumnStyle = {
-  display: 'flex',
-  flexDirection: 'column',
-  gap: '30px'
-}
-
-const rightColumnStyle = {
-  display: 'flex',
-  flexDirection: 'column',
-  gap: '30px'
-}
-
-const cardStyle = {
-  background: 'white',
-  padding: '30px',
-  borderRadius: '15px',
-  boxShadow: '0 4px 20px rgba(0, 0, 0, 0.1)',
-  border: '1px solid #f0f0f0'
-}
-
-const cardHeaderStyle = {
-  display: 'flex',
-  alignItems: 'center',
-  gap: '10px',
-  marginBottom: '20px'
-}
-
-const cardTitleStyle = {
-  fontSize: '1.5rem',
-  fontWeight: 'bold',
-  color: '#2c3e50',
-  margin: 0
-}
-
-const progressContainerStyle = {
-  marginBottom: '20px'
-}
-
-const progressInfoStyle = {
-  display: 'flex',
-  justifyContent: 'space-between',
-  marginBottom: '10px'
-}
-
-const progressLabelStyle = {
-  color: '#666',
-  fontSize: '0.9rem'
-}
-
-const progressPercentageStyle = {
-  color: '#666',
-  fontSize: '0.9rem',
-  fontWeight: '600'
-}
-
-const progressBarBackgroundStyle = {
-  height: '12px',
-  background: '#f0f0f0',
-  borderRadius: '10px',
-  overflow: 'hidden',
-  marginBottom: '20px'
-}
-
-const progressBarFillStyle = {
-  height: '100%',
-  background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-  borderRadius: '10px',
-  transition: 'width 0.5s ease'
-}
-
-const progressStatsStyle = {
-  display: 'grid',
-  gridTemplateColumns: '1fr 1fr',
-  gap: '15px'
-}
-
-const progressStatStyle = {
-  textAlign: 'center',
-  padding: '15px',
-  background: '#f8f9fa',
-  borderRadius: '10px'
-}
-
-const progressNumberStyle = {
-  fontSize: '1.5rem',
-  fontWeight: 'bold',
-  marginBottom: '5px'
-}
-
-const progressStatLabelStyle = {
-  color: '#666',
-  fontSize: '0.9rem'
-}
-
-const testListStyle = {
-  display: 'flex',
-  flexDirection: 'column',
-  gap: '15px'
-}
-
-const testItemStyle = {
-  display: 'flex',
-  alignItems: 'center',
-  gap: '15px',
-  padding: '20px',
-  border: '1px solid #e0e0e0',
-  borderRadius: '10px',
-  transition: 'all 0.3s ease'
-}
-
-const testIconStyle = {
-  fontSize: '1.5rem'
-}
-
-const testContentStyle = {
-  flex: 1
-}
-
-const testHeaderStyle = {
-  display: 'flex',
-  alignItems: 'center',
-  gap: '10px',
-  marginBottom: '8px'
-}
-
-const testTitleStyle = {
-  margin: 0,
-  fontSize: '1.1rem',
-  fontWeight: '600',
-  color: '#2c3e50',
-  display: 'flex',
-  alignItems: 'center',
-  gap: '10px'
-}
-
-const priorityBadgeStyle = {
-  background: '#e74c3c',
-  color: 'white',
-  padding: '4px 8px',
-  borderRadius: '12px',
-  fontSize: '0.7rem',
-  fontWeight: 'bold'
-}
-
-const testDetailsStyle = {
-  display: 'flex',
-  gap: '15px',
-  flexWrap: 'wrap'
-}
-
-const testDetailsStyleSpan = {
-  color: '#666',
-  fontSize: '0.9rem'
-}
-
-const testButtonStyle = {
-  padding: '8px 16px',
-  border: 'none',
-  borderRadius: '8px',
-  cursor: 'pointer',
-  fontWeight: '600',
-  transition: 'all 0.3s ease',
-  textDecoration: 'none',
-  display: 'inline-block'
-}
-
-const testButtonPrimaryStyle = {
-  background: '#e74c3c',
-  color: 'white'
-}
-
-const testButtonSecondaryStyle = {
-  background: 'transparent',
-  color: '#667eea',
-  border: '2px solid #667eea'
-}
-
-const actionsStyle = {
-  display: 'flex',
-  flexDirection: 'column',
-  gap: '12px'
-}
-
-const actionButtonStyle = {
-  padding: '15px 20px',
-  background: 'transparent',
-  border: '2px solid #e0e0e0',
-  borderRadius: '10px',
-  color: '#2c3e50',
-  textDecoration: 'none',
-  display: 'flex',
-  alignItems: 'center',
-  gap: '10px',
-  fontWeight: '600',
-  transition: 'all 0.3s ease',
-  textAlign: 'left'
-}
-
-const actionButtonPrimaryStyle = {
-  ...actionButtonStyle,
-  background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-  color: 'white',
-  border: 'none'
-}
-
-const notificationsListStyle = {
-  display: 'flex',
-  flexDirection: 'column',
-  gap: '12px',
-  marginBottom: '20px'
-}
-
-const notificationItemStyle = {
-  display: 'flex',
-  alignItems: 'flex-start',
-  gap: '12px',
-  padding: '15px',
-  border: '1px solid #e0e0e0',
-  borderRadius: '8px',
-  background: '#f8f9fa'
-}
-
-const notificationIconStyle = {
-  fontSize: '1.2rem'
-}
-
-const notificationContentStyle = {
-  flex: 1
-}
-
-const notificationMessageStyle = {
-  fontWeight: '500',
-  color: '#2c3e50',
-  marginBottom: '4px'
-}
-
-const notificationTimeStyle = {
-  fontSize: '0.8rem',
-  color: '#666'
-}
-
-const viewAllButtonStyle = {
-  display: 'block',
-  textAlign: 'center',
-  padding: '12px',
-  color: '#667eea',
-  textDecoration: 'none',
-  fontWeight: '600',
-  border: '2px solid #667eea',
-  borderRadius: '8px',
-  transition: 'all 0.3s ease'
-}
-
-const studyTipStyle = {
-  background: 'linear-gradient(135deg, #a8edea 0%, #fed6e3 100%)',
+const contactSupportStyle = {
+  marginTop: '40px',
+  background: '#f7f7f7',
   padding: '25px',
   borderRadius: '15px',
   boxShadow: '0 4px 15px rgba(0, 0, 0, 0.1)'
 }
 
-const studyTipTitleStyle = {
-  fontSize: '1.3rem',
+const contactSupportTitleStyle = {
+  fontSize: '1.5rem',
   fontWeight: 'bold',
-  color: '#2c3e50',
-  margin: '0 0 12px 0'
+  color: '#2d3436',
+  margin: '0 0 15px 0'
 }
 
-const studyTipTextStyle = {
-  color: '#2c3e50',
-  margin: '0 0 15px 0',
-  lineHeight: '1.5'
+const contactSupportTextStyle = {
+  fontSize: '1.1rem',
+  color: '#2d3436',
+  margin: '0 0 15px 0'
 }
 
-const tipBadgeStyle = {
-  background: '#667eea',
-  color: 'white',
-  padding: '6px 12px',
-  borderRadius: '15px',
-  fontSize: '0.8rem',
-  fontWeight: 'bold'
-}
-
-const quizzesGridStyle = {
-  display: 'grid',
-  gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
-  gap: '20px',
-  marginBottom: '20px'
-}
-
-const quizCardStyle = {
-  padding: '25px',
-  border: '1px solid #e0e0e0',
-  borderRadius: '12px',
-  background: 'white',
-  boxShadow: '0 2px 10px rgba(0, 0, 0, 0.05)',
-  transition: 'all 0.3s ease'
-}
-
-const quizTitleStyle = {
-  fontSize: '1.2rem',
-  fontWeight: 'bold',
-  color: '#2c3e50',
-  margin: '0 0 12px 0'
-}
-
-const quizDescriptionStyle = {
-  color: '#666',
-  fontSize: '0.9rem',
-  margin: '0 0 20px 0',
-  lineHeight: '1.4'
-}
-
-const quizFooterStyle = {
+const contactButtonContainerStyle = {
   display: 'flex',
-  justifyContent: 'space-between',
-  alignItems: 'center'
+  gap: '15px',
+  flexWrap: 'wrap'
 }
 
-const questionCountStyle = {
-  padding: '6px 12px',
+const contactButtonStyle = {
   background: '#667eea',
   color: 'white',
-  borderRadius: '15px',
-  fontSize: '0.8rem',
-  fontWeight: '600'
-}
-
-const startQuizButtonStyle = {
-  padding: '8px 16px',
-  background: '#27ae60',
-  color: 'white',
-  textDecoration: 'none',
+  padding: '12px 20px',
   borderRadius: '8px',
+  textDecoration: 'none',
   fontWeight: '600',
-  transition: 'all 0.3s ease'
-}
-
-const viewAllQuizzesStyle = {
+  cursor: 'pointer',
+  transition: 'all 0.3s ease',
   textAlign: 'center',
-  marginTop: '20px'
+  width: '200px',
+  display: 'block'
 }
-
-// Add hover effects
-Object.assign(statCardStyle, {
-  ':hover': {
-    transform: 'translateY(-5px)'
-  }
-})
-
-Object.assign(actionButtonStyle, {
-  ':hover': {
-    background: '#f8f9fa',
-    transform: 'translateX(5px)'
-  }
-})
-
-Object.assign(actionButtonPrimaryStyle, {
-  ':hover': {
-    background: 'linear-gradient(135deg, #5a6fd8 0%, #6a42a8 100%)',
-    transform: 'translateX(5px)'
-  }
-})
-
-Object.assign(testButtonSecondaryStyle, {
-  ':hover': {
-    background: '#667eea',
-    color: 'white'
-  }
-})
-
-Object.assign(viewAllButtonStyle, {
-  ':hover': {
-    background: '#667eea',
-    color: 'white'
-  }
-})
-
-Object.assign(quizCardStyle, {
-  ':hover': {
-    transform: 'translateY(-5px)',
-    boxShadow: '0 8px 25px rgba(0, 0, 0, 0.15)'
-  }
-})
-
-Object.assign(startQuizButtonStyle, {
-  ':hover': {
-    background: '#219653',
-    transform: 'scale(1.05)'
-  }
-})

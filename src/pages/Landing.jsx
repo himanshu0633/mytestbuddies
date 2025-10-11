@@ -3,7 +3,7 @@ import PropTypes from "prop-types";
 import logoFull from "../image/logoFull.png";
 import { Link } from "react-router-dom";
 import DiwaliQuizPoster from "../components/DiwaliQuizPoster";
-
+import offer from "../image/offer.jpeg";
 // Set countdown target date/time once outside component to avoid re-parsing.
 const countdownDate = new Date("October 15, 2025 23:59:59").getTime();
 
@@ -175,7 +175,6 @@ function CountdownTimer() {
               borderRadius: "12px",
               minWidth: "90px",
               boxShadow: "0 4px 15px rgba(0,0,0,0.2)",
-              border: "1px solid rgba(255, 255, 255, 0.2)",
               transition: "transform 0.3s ease"
             }}
             onMouseOver={(e) => {
@@ -292,70 +291,6 @@ FeatureCard.propTypes = {
   title: PropTypes.string.isRequired,
   description: PropTypes.string.isRequired,
   index: PropTypes.number
-};
-
-// Enhanced Circular Floating Button
-const CircularFloatingButton = ({ icon, text, color, hoverColor, onClick }) => (
-  <div
-    style={{
-      display: "flex",
-      flexDirection: "column",
-      alignItems: "center",
-      marginBottom: "25px",
-      cursor: "pointer",
-      transition: "transform 0.3s ease"
-    }}
-    onClick={onClick}
-    onMouseOver={(e) => {
-      e.currentTarget.style.transform = "translateY(-5px)";
-      e.currentTarget.querySelector('.circle-button').style.background = `linear-gradient(135deg, ${color}, ${hoverColor})`;
-      e.currentTarget.querySelector('.circle-button').style.transform = "scale(1.1) rotate(5deg)";
-    }}
-    onMouseOut={(e) => {
-      e.currentTarget.style.transform = "translateY(0)";
-      e.currentTarget.querySelector('.circle-button').style.background = color;
-      e.currentTarget.querySelector('.circle-button').style.transform = "scale(1) rotate(0)";
-    }}
-  >
-    <div
-      className="circle-button"
-      style={{
-        width: "80px",
-        height: "80px",
-        borderRadius: "50%",
-        background: color,
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        boxShadow: "0 8px 20px rgba(0, 0, 0, 0.25)",
-        transition: "all 0.4s ease",
-        marginBottom: "12px",
-        border: "4px solid white"
-      }}
-    >
-      <span style={{ fontSize: "2rem" }}>{icon}</span>
-    </div>
-    <span
-      style={{
-        fontSize: "0.9rem",
-        fontWeight: "700",
-        color: "#2c3e50",
-        textAlign: "center",
-        maxWidth: "90px",
-        lineHeight: "1.3"
-      }}
-    >
-      {text}
-    </span>
-  </div>
-);
-
-CircularFloatingButton.propTypes = {
-  icon: PropTypes.string.isRequired,
-  text: PropTypes.string.isRequired,
-  color: PropTypes.string.isRequired,
-  hoverColor: PropTypes.string.isRequired,
-  onClick: PropTypes.func.isRequired
 };
 
 export default function App() {
@@ -533,7 +468,7 @@ export default function App() {
           <div style={{ display: "flex", justifyContent: "center", flexWrap: "wrap", gap: "15px" }}>
             <Link to="/register" style={{ textDecoration: "none" }}>
               <ActionButton
-                text="Get Started Free"
+                text="Get Started "
                 color="#007bff"
                 hoverColor="#0056b3"
                 icon="🎯"
@@ -552,6 +487,26 @@ export default function App() {
           </div>
         </section>
 
+        {/* New Image Section */}
+        <section
+          style={{
+            textAlign: "center",
+            marginBottom: "50px",
+            padding: "20px 0"
+          }}
+        >
+          <img
+            src={offer}
+            alt="Feature Image"
+            style={{
+              maxWidth: "100%",
+              height: "100%",
+              borderRadius: "12px",
+              boxShadow: "0 6px 15px rgba(0, 0, 0, 0.2)"
+            }}
+          />
+        </section>
+
         {/* Diwali Quiz Poster Section */}
         <section style={{ marginBottom: "50px" }}>
           <DiwaliQuizPoster />
@@ -559,7 +514,7 @@ export default function App() {
 
         {/* Enhanced Features Grid */}
         <section style={{ marginBottom: "50px" }}>
-          <h2 style={{ 
+          <h2 style={{
             textAlign: "center", 
             color: "#2c3e50", 
             marginBottom: "40px",
