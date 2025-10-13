@@ -34,7 +34,7 @@ export default function Dashboard() {
     (async () => {
       try {
         const { data: userData } = await api.get('/auth/me')
-        setMe(userData)
+        setMe(userData?.user)
         
         const { data: quizzesData } = await api.get('/quizzes')
         setQuizzes(quizzesData || [])
@@ -176,6 +176,17 @@ export default function Dashboard() {
               WhatsApp
             </a>
           </div>
+        </div>
+        <div>
+          <a 
+              href="https://www.mytestbuddies.shop/register" 
+              target="_blank"
+              style={hoveredButton === 'megaquiz' ? {...contactButtonStyle, background: '#6a42a8'} : contactButtonStyle}
+              onMouseEnter={() => handleMouseEnter('megaquiz')} 
+              onMouseLeave={handleMouseLeave}
+            >
+              MegaQuiz
+            </a>
         </div>
       </div>
     </>
