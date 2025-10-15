@@ -1,9 +1,9 @@
-import React, { useEffect } from "react";
-import { useState } from "react";
+import React, { useEffect, useState } from "react";
 import gsap from "gsap";
-// import { LogoutButton } from '../components/authCommon'
+import { Link } from "react-router-dom";
+import api from "../utils/axios";
 
-import logo from '../image/logo.png';
+import logo from "../image/logo.png";
 const emailRe = /^\S+@\S+\.\S+$/;
 const mobileRe = /^[0-9]{7,15}$/;
 
@@ -11,53 +11,89 @@ const Navbar = () => {
   const [fieldErr, setFieldErr] = useState({});
   const [loading, setLoading] = useState(false);
   const [navLinksActive, setNavLinksActive] = useState(false);
+  const [me, setMe] = useState(null); // <-- current user
 
-  // Logo Animation on Load
+  // Fetch current user (to read role)
   useEffect(() => {
-    const logoIcon = document.querySelector('.logo-icon');
-    const letters = document.querySelectorAll('.logo-text span');
-    
+    (async () => {
+      try {
+        const { data } = await api.get("/auth/me");
+        setMe(data?.user || null);
+      } catch (e) {
+        setMe(null);
+      }
+    })();
+  }, []);
+
+  // Logo Animation on Load (and cleanup listeners)
+  useEffect(() => {
+    const logoIcon = document.querySelector(".logo-icon");
+    const letters = document.querySelectorAll(".logo-text span");
+    const logoContainer = document.querySelector(".logo-container");
+
     const tl = gsap.timeline({ defaults: { duration: 0.6, ease: "power2.out" } });
     tl.from(logoIcon, { y: -8, rotation: -5, duration: 0.8, ease: "bounce.out" });
     tl.to(letters, { opacity: 1, y: 0, stagger: 0.08 }, "-=0.4");
 
-    gsap.to(logoIcon, { y: "+=5", repeat: -1, yoyo: true, duration: 2, ease: "sine.inOut" });
+    const floatAnim = gsap.to(logoIcon, { y: "+=5", repeat: -1, yoyo: true, duration: 2, ease: "sine.inOut" });
 
-    const logoContainer = document.querySelector('.logo-container');
-    logoContainer.addEventListener('mouseenter', () => {
+    const enter = () => {
       gsap.to(logoIcon, { scale: 1.1, rotation: 5, duration: 0.3 });
       gsap.to(letters, { color: "#1E90FF", duration: 0.3 });
-    });
-    logoContainer.addEventListener('mouseleave', () => {
+    };
+    const leave = () => {
       gsap.to(logoIcon, { scale: 1, rotation: 0, duration: 0.3 });
       gsap.to(letters, { color: "#fff", duration: 0.3 });
-    });
+    };
+
+    logoContainer?.addEventListener("mouseenter", enter);
+    logoContainer?.addEventListener("mouseleave", leave);
+
+    return () => {
+      floatAnim?.kill();
+      logoContainer?.removeEventListener("mouseenter", enter);
+      logoContainer?.removeEventListener("mouseleave", leave);
+    };
   }, []);
 
-  // Toggle mobile menu
-  const toggleNavLinks = () => {
-    setNavLinksActive(!navLinksActive);
+  const toggleNavLinks = () => setNavLinksActive(!navLinksActive);
+
+  const handleLogout = () => {
+    localStorage.removeItem("token");
+    window.location.href = "/";
   };
+
+  const isAdmin = me?.role === "admin";
 
   return (
     <nav style={styles.nav}>
       {/* Logo */}
       <div className="logo-container" style={styles.logoContainer}>
-          <img src={logo} alt="Logo" className="logo-icon" style={styles.logoIcon} />
+        <img src={logo} alt="Logo" className="logo-icon" style={styles.logoIcon} />
         <div className="logo-text" style={styles.logoText}>
           <span>m</span><span>y</span><span>t</span><span>e</span><span>s</span><span>t</span>
           <span>b</span><span>u</span><span>d</span><span>d</span><span>i</span><span>e</span><span>s</span>
         </div>
       </div>
-     
 
       {/* Links */}
-      <div className={`nav-links ${navLinksActive ? "active" : ""}`} style={styles.navLinks}>
-        {/* <a href="#" style={styles.navLink}>Home</a>
-        <a href="#" style={styles.navLink}>About</a>
-        <a href="#" style={styles.navLink}>Courses</a> */}
-        <a style={styles.navLink}onClick={() => { localStorage.removeItem('token'); window.location.href='/' }}>Logout</a>
-      
+      <div
+        className={`nav-links ${navLinksActive ? "active" : ""}`}
+        style={navLinksActive ? { ...styles.navLinks, ...styles.navLinksActive } : styles.navLinks}
+      >
+        {/* Admin-only links */}
+        {isAdmin && (
+          <>
+            <Link to="/admin/fields" style={styles.navLink}>Manage Fields</Link>
+            <Link to="/admin/add-question" style={styles.navLink}>Add Question</Link>
+          </>
+        )}
+
+        {/* (Add other common links if needed) */}
+        {/* <Link to="/dashboard" style={styles.navLink}>Dashboard</Link> */}
+
+        {/* Logout */}
+        <a style={styles.navLink} onClick={handleLogout}>Logout</a>
       </div>
 
       {/* Hamburger */}
@@ -89,7 +125,7 @@ const styles = {
   logoIcon: {
     width: '50px',
     height: '70px',
-    marginRight: '10px',    
+    marginRight: '10px',
   },
   logoText: {
     fontSize: '1.5rem',
@@ -107,6 +143,7 @@ const styles = {
     fontWeight: 'bold',
     transition: 'color 0.3s',
     position: 'relative',
+    cursor: 'pointer'
   },
   hamburger: {
     display: 'none',
@@ -129,7 +166,7 @@ const styles = {
     gap: '10px',
     padding: '10px',
     borderRadius: '6px',
-  }
+  },
 };
 
 export default Navbar;

@@ -1,0 +1,74 @@
+import { useState, useEffect } from 'react';
+import axios from 'axios';
+
+function FieldQuestions({ fieldId }) {
+  const [questions, setQuestions] = useState([]);
+  const [answers, setAnswers] = useState([]);
+  const [progress, setProgress] = useState(null);
+
+  useEffect(() => {
+    // Fetch questions for the field
+    axios.get(`/api/questions/${fieldId}`)
+      .then(response => setQuestions(response.data.questions))
+      .catch(err => console.error(err));
+  }, [fieldId]);
+
+  const handleAnswerChange = (questionId, answer) => {
+    setAnswers(prev => {
+      const newAnswers = [...prev];
+      const index = newAnswers.findIndex(a => a.questionId === questionId);
+      if (index !== -1) {
+        newAnswers[index].answer = answer;
+      } else {
+        newAnswers.push({ questionId, answer });
+      }
+      return newAnswers;
+    });
+  };
+
+  const handleSubmit = () => {
+    axios.post('/api/questions/submit-answers', { fieldId, answers })
+      .then(response => {
+        setProgress(response.data.progress);
+      })
+      .catch(err => console.error(err));
+  };
+
+  return (
+    <div>
+      <h3>Field Questions</h3>
+      {questions.map((question) => (
+        <div key={question._id}>
+          <p>{question.text}</p>
+          {question.type === 'mcq' ? (
+            question.options.map(option => (
+              <label key={option._id}>
+                <input 
+                  type="radio" 
+                  name={question._id} 
+                  value={option.text} 
+                  onChange={(e) => handleAnswerChange(question._id, e.target.value)} 
+                />
+                {option.text}
+              </label>
+            ))
+          ) : (
+            <input 
+              type="text" 
+              onChange={(e) => handleAnswerChange(question._id, e.target.value)} 
+            />
+          )}
+        </div>
+      ))}
+      <button onClick={handleSubmit}>Submit Answers</button>
+
+      {progress && (
+        <div>
+          <h4>Your Progress</h4>
+          <p>Total Correct: {progress.totalCorrect}</p>
+          <p>Total Answered: {progress.totalAnswered}</p>
+        </div>
+      )}
+    </div>
+  );
+}

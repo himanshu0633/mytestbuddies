@@ -73,31 +73,33 @@ export default function Register() {
   };
 
   // Step 1 submit: validate + send OTP → open modal
-  const submitStep1 = async (e) => {
-    e.preventDefault();
-    setInfoMsg('');
-    setOtpError('');
-    if (!validateStep1()) {
-      showToast('error', 'Please fix the highlighted fields.');
-      return;
-    }
+    const submitStep1 = async (e) => {
 
-    try {
-      setOtpSending(true);
-      await api.post('/auth/send-otp', { email: form.email }); // adjust if needed
-      setOtpModalOpen(true);
-      setInfoMsg('OTP sent to your email. Please check inbox/spam.');
-      setResendTimer(RESEND_WINDOW);
-      showToast('success', 'OTP sent successfully.');
-    } catch (err) {
-      console.error('OTP send error:', err);
+      
+      e.preventDefault();
       setInfoMsg('');
-      setErrors((prev) => ({ ...prev, email: 'Failed to send OTP. Please try again.' }));
-      showToast('error', 'Failed to send OTP.');
-    } finally {
-      setOtpSending(false);
-    }
-  };
+      setOtpError('');
+      if (!validateStep1()) {
+        showToast('error', 'Please fix the highlighted fields.');
+        return;
+      }
+
+      try {
+        setOtpSending(true);
+        await api.post('/auth/send-otp', { email: form.email }); // adjust if needed
+        setOtpModalOpen(true);
+        setInfoMsg('OTP sent to your email. Please check inbox/spam.');
+        setResendTimer(RESEND_WINDOW);
+        showToast('success', 'OTP sent successfully.');
+      } catch (err) {
+        console.error('OTP send error:', err);
+        setInfoMsg('');
+        setErrors((prev) => ({ ...prev, email: 'Failed to send OTP. Please try again.' }));
+        showToast('error', 'Failed to send OTP.');
+      } finally {
+        setOtpSending(false);
+      }
+    };
 
   const verifyOtpAndContinue = async () => {
     setOtpError('');

@@ -19,6 +19,7 @@ const EmailIcon = () => <span style={{ fontSize: '20px' }}>📧</span>
 
 export default function Dashboard() {
   const [me, setMe] = useState(null)
+  const [fields, setFields] = useState([]) // ✅ Fields state add kiya
   const [quizzes, setQuizzes] = useState([])
   const [stats, setStats] = useState({
     totalQuizzes: 0,
@@ -28,16 +29,24 @@ export default function Dashboard() {
   })
   const [upcomingTests, setUpcomingTests] = useState([])
   const [notifications, setNotifications] = useState([])
-  const [hoveredButton, setHoveredButton] = useState(null) // State for hover effect
+  const [hoveredButton, setHoveredButton] = useState(null)
+  const [loading, setLoading] = useState(false)
 
   useEffect(() => {
     (async () => {
       try {
+        setLoading(true)
         const { data: userData } = await api.get('/auth/me')
         setMe(userData?.user)
         
-        const { data: quizzesData } = await api.get('/quizzes')
-        setQuizzes(quizzesData || [])
+        // ✅ Fields fetch karo
+        try {
+          const { data: fieldsData } = await api.get('/admin/fields')
+          setFields(fieldsData || [])
+        } catch (fieldsError) {
+          console.error('Error fetching fields:', fieldsError)
+          setFields([]) // Default empty array
+        }
         
         // Mock stats data
         setStats({
@@ -62,6 +71,8 @@ export default function Dashboard() {
         ])
       } catch (error) {
         console.error('Error fetching dashboard data:', error)
+      } finally {
+        setLoading(false)
       }
     })()
   }, [])
@@ -142,6 +153,76 @@ export default function Dashboard() {
           </div>
         </div>
 
+        {/* Practice Fields Section - ✅ YEH SECTION ADD KIYA */}
+        {!loading && (
+          <div style={fieldsSectionStyle}>
+            <div style={sectionHeaderStyle}>
+              <h2 style={sectionTitleStyle}>Practice Fields</h2>
+              <p style={sectionSubtitleStyle}>
+                Choose from various fields to practice and improve your skills
+              </p>
+              
+            </div>
+
+            <div style={fieldsGridStyle}>
+  {fields.map(field => (
+    <div key={field._id} style={previewCardStyle}>
+      <div style={previewCardHeaderStyle}>
+        <span style={previewIconStyle}>
+          {field.for === 'Student' ? '🎓' : '🌐'}
+        </span>
+        <h3 style={previewFieldNameStyle}>{field.name}</h3>
+      </div>
+      <p style={previewDescriptionStyle}>
+        {field.description || 'Start practicing questions in this field'}
+      </p>
+      <Link 
+        to={`/field/que/${field._id}`} 
+        style={previewButtonStyle}
+      >
+        View Quiz
+      </Link>
+    </div>
+  ))}
+</div>
+
+
+            {fields.length === 0 && (
+              <div style={emptyFieldsStyle}>
+                <p>No fields available at the moment.</p>
+                <p>Please check back later or contact support.</p>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Admin Section - Agar user admin hai to */}
+         {me?.role === 'admin' && (
+          <div style={adminSectionStyle}>
+            <h2 style={adminTitleStyle}>Admin Panel</h2>
+            <div style={adminGridStyle}>
+              <Link to="/admin/fields" style={adminCardStyle}>
+                <div style={adminCardContentStyle}>
+                  <span style={adminIconStyle}>📚</span>
+                  <h3 style={adminCardTitleStyle}>Manage Fields</h3>
+                  <p style={adminCardTextStyle}>Create, edit and manage quiz fields</p>
+                </div>
+              </Link>
+              
+              {/* Future admin features yahan add kar sakte hain */}
+              
+                <Link to="/admin/add-question" style={adminCardStyle}>
+                  <div style={adminCardContentStyle}>
+                    <span style={adminIconStyle}>❓</span>
+                    <h3 style={adminCardTitleStyle}>Manage Questions</h3>
+                    <p style={adminCardTextStyle}>Add and manage quiz questions</p>
+                  </div>
+                </Link>
+              
+            </div>
+          </div>
+        )} 
+
         {/* Contact Support Section */}
         <div style={contactSupportStyle}>
           <h3 style={contactSupportTitleStyle}>Contact Support</h3>
@@ -151,6 +232,7 @@ export default function Dashboard() {
             <a 
               href="https://www.instagram.com/mytestbuddies.shop?igsh=bGs0aWtpNXg1N3dt" 
               target="_blank"
+              rel="noopener noreferrer"
               style={hoveredButton === 'instagram' ? {...contactButtonStyle, background: '#6a42a8'} : contactButtonStyle}
               onMouseEnter={() => handleMouseEnter('instagram')} 
               onMouseLeave={handleMouseLeave}
@@ -160,6 +242,7 @@ export default function Dashboard() {
             <a 
               href="https://t.me/mytestbuddies" 
               target="_blank"
+              rel="noopener noreferrer"
               style={hoveredButton === 'telegram' ? {...contactButtonStyle, background: '#6a42a8'} : contactButtonStyle}
               onMouseEnter={() => handleMouseEnter('telegram')} 
               onMouseLeave={handleMouseLeave}
@@ -169,6 +252,7 @@ export default function Dashboard() {
             <a 
               href="https://whatsapp.com/channel/0029VbBqVVSInlqPiW153j23" 
               target="_blank"
+              rel="noopener noreferrer"
               style={hoveredButton === 'whatsapp' ? {...contactButtonStyle, background: '#6a42a8'} : contactButtonStyle}
               onMouseEnter={() => handleMouseEnter('whatsapp')} 
               onMouseLeave={handleMouseLeave}
@@ -176,17 +260,6 @@ export default function Dashboard() {
               WhatsApp
             </a>
           </div>
-        </div>
-        <div>
-          <a 
-              href="https://www.mytestbuddies.shop/register" 
-              target="_blank"
-              style={hoveredButton === 'megaquiz' ? {...contactButtonStyle, background: '#6a42a8'} : contactButtonStyle}
-              onMouseEnter={() => handleMouseEnter('megaquiz')} 
-              onMouseLeave={handleMouseLeave}
-            >
-              MegaQuiz
-            </a>
         </div>
       </div>
     </>
@@ -300,6 +373,160 @@ const badgeStyle = {
   gap: '5px'
 }
 
+// ✅ New Fields Section Styles
+const fieldsSectionStyle = {
+  marginTop: '40px',
+  background: 'white',
+  padding: '30px',
+  borderRadius: '15px',
+  boxShadow: '0 4px 15px rgba(0, 0, 0, 0.1)'
+}
+
+const sectionHeaderStyle = {
+  textAlign: 'center',
+  marginBottom: '30px'
+}
+
+const sectionTitleStyle = {
+  fontSize: '2rem',
+  fontWeight: 'bold',
+  background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+  WebkitBackgroundClip: 'text',
+  WebkitTextFillColor: 'transparent',
+  backgroundClip: 'text',
+  margin: '0 0 10px 0'
+}
+
+const sectionSubtitleStyle = {
+  fontSize: '1.1rem',
+  color: '#666',
+  margin: '0 0 20px 0'
+}
+
+const viewAllButtonStyle = {
+  background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+  color: 'white',
+  padding: '10px 20px',
+  borderRadius: '25px',
+  textDecoration: 'none',
+  fontWeight: '600',
+  display: 'inline-block'
+}
+
+const fieldsGridStyle = {
+  display: 'grid',
+  gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
+  gap: '20px'
+}
+
+const previewCardStyle = {
+  background: '#f8f9fa',
+  padding: '20px',
+  borderRadius: '10px',
+  borderLeft: '4px solid #667eea',
+  transition: 'transform 0.2s ease'
+}
+
+const previewCardHeaderStyle = {
+  display: 'flex',
+  alignItems: 'center',
+  gap: '15px',
+  marginBottom: '10px'
+}
+
+const previewIconStyle = {
+  fontSize: '1.5rem'
+}
+
+const previewFieldNameStyle = {
+  margin: 0,
+  fontSize: '1.2rem',
+  fontWeight: 'bold',
+  color: '#2d3436'
+}
+
+const previewDescriptionStyle = {
+  margin: '0 0 15px 0',
+  color: '#636e72',
+  lineHeight: '1.5'
+}
+
+const previewButtonStyle = {
+  background: 'transparent',
+  border: '2px solid #667eea',
+  color: '#667eea',
+  padding: '8px 16px',
+  borderRadius: '20px',
+  textDecoration: 'none',
+  fontSize: '0.9rem',
+  fontWeight: '600',
+  display: 'inline-block',
+  transition: 'all 0.3s ease'
+}
+
+const emptyFieldsStyle = {
+  textAlign: 'center',
+  padding: '40px',
+  color: '#636e72',
+  fontSize: '1.1rem'
+}
+
+// ✅ Admin Section Styles
+const adminSectionStyle = {
+  marginTop: '40px',
+  padding: '25px',
+  background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+  borderRadius: '15px',
+  color: 'white'
+}
+
+const adminTitleStyle = {
+  fontSize: '1.8rem',
+  fontWeight: 'bold',
+  margin: '0 0 20px 0',
+  textAlign: 'center'
+}
+
+const adminGridStyle = {
+  display: 'grid',
+  gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))',
+  gap: '20px'
+}
+
+const adminCardStyle = {
+  background: 'rgba(255, 255, 255, 0.1)',
+  padding: '20px',
+  borderRadius: '12px',
+  textDecoration: 'none',
+  color: 'white',
+  border: '1px solid rgba(255, 255, 255, 0.2)',
+  transition: 'all 0.3s ease',
+  backdropFilter: 'blur(10px)'
+}
+
+const adminCardContentStyle = {
+  textAlign: 'center'
+}
+
+const adminIconStyle = {
+  fontSize: '2.5rem',
+  marginBottom: '15px',
+  display: 'block'
+}
+
+const adminCardTitleStyle = {
+  fontSize: '1.3rem',
+  fontWeight: 'bold',
+  margin: '0 0 10px 0'
+}
+
+const adminCardTextStyle = {
+  fontSize: '0.9rem',
+  opacity: 0.9,
+  margin: 0
+}
+
+// Contact Support Styles
 const contactSupportStyle = {
   marginTop: '40px',
   background: '#f7f7f7',
