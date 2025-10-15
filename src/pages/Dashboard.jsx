@@ -19,7 +19,7 @@ const EmailIcon = () => <span style={{ fontSize: '20px' }}>📧</span>
 
 export default function Dashboard() {
   const [me, setMe] = useState(null)
-  const [fields, setFields] = useState([]) // ✅ Fields state add kiya
+  const [fields, setFields] = useState([])
   const [quizzes, setQuizzes] = useState([])
   const [stats, setStats] = useState({
     totalQuizzes: 0,
@@ -31,6 +31,21 @@ export default function Dashboard() {
   const [notifications, setNotifications] = useState([])
   const [hoveredButton, setHoveredButton] = useState(null)
   const [loading, setLoading] = useState(false)
+  const [isBlinking, setIsBlinking] = useState(true)
+
+  // Mock participant data with masked numbers
+  const participants = [
+    { name: "Aarav Sharma", number: "78*****23" },
+    { name: "Priya Patel", number: "91*****47" },
+    { name: "Rohan Kumar", number: "83*****39" },
+    { name: "Sneha Singh", number: "76*****81" },
+    { name: "Vikram Joshi", number: "89*****15" },
+    { name: "Ananya Gupta", number: "94*****62" },
+    { name: "Karan Malhotra", number: "85*****74" },
+    { name: "Neha Reddy", number: "79*****28" },
+    { name: "Amit Verma", number: "82*****53" },
+    { name: "Pooja Mehta", number: "88*****91" }
+  ]
 
   useEffect(() => {
     (async () => {
@@ -39,16 +54,14 @@ export default function Dashboard() {
         const { data: userData } = await api.get('/auth/me')
         setMe(userData?.user)
         
-        // ✅ Fields fetch karo
         try {
           const { data: fieldsData } = await api.get('/admin/fields')
           setFields(fieldsData || [])
         } catch (fieldsError) {
           console.error('Error fetching fields:', fieldsError)
-          setFields([]) // Default empty array
+          setFields([])
         }
         
-        // Mock stats data
         setStats({
           totalQuizzes: 12,
           completedQuizzes: 8,
@@ -56,14 +69,12 @@ export default function Dashboard() {
           rank: 45
         })
         
-        // Mock upcoming tests
         setUpcomingTests([
           { id: 1, title: 'Mathematics Mega Test', date: '2024-10-25', time: '10:00 AM', duration: '180 mins', priority: 'high' },
           { id: 2, title: 'Physics Weekly Quiz', date: '2024-10-26', time: '02:00 PM', duration: '60 mins', priority: 'medium' },
           { id: 3, title: 'Chemistry Practice Test', date: '2024-10-27', time: '11:00 AM', duration: '90 mins', priority: 'low' }
         ])
         
-        // Mock notifications
         setNotifications([
           { id: 1, message: 'Your Mathematics test result is available', time: '2 hours ago', type: 'result' },
           { id: 2, message: 'New quiz added: Advanced Physics Concepts', time: '1 day ago', type: 'new_quiz' },
@@ -77,9 +88,16 @@ export default function Dashboard() {
     })()
   }, [])
 
+  // Blinking effect for the mega quiz banner
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setIsBlinking(prev => !prev)
+    }, 1000)
+    return () => clearInterval(interval)
+  }, [])
+
   const progressValue = stats.totalQuizzes > 0 ? (stats.completedQuizzes / stats.totalQuizzes) * 100 : 0
 
-  // Priority colors
   const getPriorityColor = (priority) => {
     switch (priority) {
       case 'high': return '#e74c3c'
@@ -89,7 +107,6 @@ export default function Dashboard() {
     }
   }
 
-  // Notification icons
   const getNotificationIcon = (type) => {
     switch (type) {
       case 'result': return '📊'
@@ -99,7 +116,6 @@ export default function Dashboard() {
     }
   }
 
-  // Handlers for hover effect
   const handleMouseEnter = (button) => {
     setHoveredButton(button)
   }
@@ -112,6 +128,9 @@ export default function Dashboard() {
     <>
       <Navbar />
       <div style={containerStyle}>
+       {/* Mega Quiz Live Banner */}
+        
+
         {/* Welcome Section */}
         <div style={welcomeSectionStyle}>
           <div style={userInfoStyle}>
@@ -128,7 +147,79 @@ export default function Dashboard() {
             </div>
           </div>
           
-          {/* Important Announcement */}
+        
+        </div>
+         {/* Mega Quiz Live Banner */}
+        <div style={{
+          ...megaQuizBannerStyle,
+          border: isBlinking ? '3px solid #ff6b6b' : '3px solid #4ecdc4',
+          boxShadow: isBlinking ? '0 0 20px rgba(255, 107, 107, 0.6)' : '0 0 20px rgba(78, 205, 196, 0.6)'
+        }}>
+          <div style={megaQuizContentStyle}>
+            <div style={megaQuizHeaderStyle}>
+              <div style={liveBadgeStyle}>
+                <span style={livePulseStyle}></span>
+                🔴 LIVE NOW
+              </div>
+              <h1 style={megaQuizTitleStyle}>🎯 MEGA QUIZ COMPETITION 🎯</h1>
+              <p style={megaQuizSubtitleStyle}>
+                Answer questions & win <strong>Big Prizes!</strong> 🏆💰
+              </p>
+            </div>
+            
+            <div style={prizesSectionStyle}>
+              <div style={prizeCardStyle}>
+                <div style={prizeIconStyle}>🥇</div>
+                <div style={prizeInfoStyle}>
+                  <h3 style={prizeTitleStyle}>First Prize</h3>
+                  <p style={prizeAmountStyle}>Apple MacBook Air m4</p>
+                </div>
+              </div>
+              <div style={prizeCardStyle}>
+                <div style={prizeIconStyle}>🥈</div>
+                <div style={prizeInfoStyle}>
+                  <h3 style={prizeTitleStyle}>Second Prize</h3>
+                  <p style={prizeAmountStyle}>Apple MacBook Air m3</p>
+                </div>
+              </div>
+              <div style={prizeCardStyle}>
+                <div style={prizeIconStyle}>🥉</div>
+                <div style={prizeInfoStyle}>
+                  <h3 style={prizeTitleStyle}>Third Prize</h3>
+                  <p style={prizeAmountStyle}>Apple MacBook Air m2</p>
+                </div>
+              </div>
+              
+            </div>
+
+            <Link to="/mega-quiz" style={participateButtonStyle}>
+              🚀 Participate Now 🚀
+            </Link>
+
+            {/* Participants Scrolling Section */}
+            <div style={participantsSectionStyle}>
+              <div style={participantsHeaderStyle}>
+                <PeopleIcon /> Recent Participants
+              </div>
+              <div style={scrollingContainerStyle}>
+                <div style={scrollingContentStyle}>
+                  {[...participants, ...participants].map((participant, index) => (
+                    <div key={index} style={participantCardStyle}>
+                      <div style={participantAvatarStyle}>
+                        {participant.name.charAt(0)}
+                      </div>
+                      <div style={participantInfoStyle}>
+                        <div style={participantNameStyle}>{participant.name}</div>
+                        <div style={participantNumberStyle}>{participant.number}</div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+  {/* Important Announcement */}
           <div style={announcementStyle}>
             <div style={announcementContentStyle}>
               <div style={announcementIconStyle}>📢</div>
@@ -151,9 +242,7 @@ export default function Dashboard() {
               </div>
             </div>
           </div>
-        </div>
-
-        {/* Practice Fields Section - ✅ YEH SECTION ADD KIYA */}
+        {/* Practice Fields Section */}
         {!loading && (
           <div style={fieldsSectionStyle}>
             <div style={sectionHeaderStyle}>
@@ -161,31 +250,29 @@ export default function Dashboard() {
               <p style={sectionSubtitleStyle}>
                 Choose from various fields to practice and improve your skills
               </p>
-              
             </div>
 
             <div style={fieldsGridStyle}>
-  {fields.map(field => (
-    <div key={field._id} style={previewCardStyle}>
-      <div style={previewCardHeaderStyle}>
-        <span style={previewIconStyle}>
-          {field.for === 'Student' ? '🎓' : '🌐'}
-        </span>
-        <h3 style={previewFieldNameStyle}>{field.name}</h3>
-      </div>
-      <p style={previewDescriptionStyle}>
-        {field.description || 'Start practicing questions in this field'}
-      </p>
-      <Link 
-        to={`/field/que/${field._id}`} 
-        style={previewButtonStyle}
-      >
-        View Quiz
-      </Link>
-    </div>
-  ))}
-</div>
-
+              {fields.map(field => (
+                <div key={field._id} style={previewCardStyle}>
+                  <div style={previewCardHeaderStyle}>
+                    <span style={previewIconStyle}>
+                      {field.for === 'Student' ? '🎓' : '🌐'}
+                    </span>
+                    <h3 style={previewFieldNameStyle}>{field.name}</h3>
+                  </div>
+                  <p style={previewDescriptionStyle}>
+                    {field.description || 'Start practicing questions in this field'}
+                  </p>
+                  <Link 
+                    to={`/field/que/${field._id}`} 
+                    style={previewButtonStyle}
+                  >
+                    View Quiz
+                  </Link>
+                </div>
+              ))}
+            </div>
 
             {fields.length === 0 && (
               <div style={emptyFieldsStyle}>
@@ -196,8 +283,8 @@ export default function Dashboard() {
           </div>
         )}
 
-        {/* Admin Section - Agar user admin hai to */}
-         {me?.role === 'admin' && (
+        {/* Admin Section */}
+        {me?.role === 'admin' && (
           <div style={adminSectionStyle}>
             <h2 style={adminTitleStyle}>Admin Panel</h2>
             <div style={adminGridStyle}>
@@ -209,19 +296,16 @@ export default function Dashboard() {
                 </div>
               </Link>
               
-              {/* Future admin features yahan add kar sakte hain */}
-              
-                <Link to="/admin/add-question" style={adminCardStyle}>
-                  <div style={adminCardContentStyle}>
-                    <span style={adminIconStyle}>❓</span>
-                    <h3 style={adminCardTitleStyle}>Manage Questions</h3>
-                    <p style={adminCardTextStyle}>Add and manage quiz questions</p>
-                  </div>
-                </Link>
-              
+              <Link to="/admin/add-question" style={adminCardStyle}>
+                <div style={adminCardContentStyle}>
+                  <span style={adminIconStyle}>❓</span>
+                  <h3 style={adminCardTitleStyle}>Manage Questions</h3>
+                  <p style={adminCardTextStyle}>Add and manage quiz questions</p>
+                </div>
+              </Link>
             </div>
           </div>
-        )} 
+        )}
 
         {/* Contact Support Section */}
         <div style={contactSupportStyle}>
@@ -266,7 +350,7 @@ export default function Dashboard() {
   )
 }
 
-// Enhanced Styles
+// Enhanced Styles with Mega Quiz Section
 const containerStyle = {
   maxWidth: '1200px',
   margin: '0 auto',
@@ -274,6 +358,195 @@ const containerStyle = {
   fontFamily: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif"
 }
 
+// Mega Quiz Banner Styles
+const megaQuizBannerStyle = {
+  background: 'linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%)',
+  borderRadius: '20px',
+  padding: '25px',
+  marginBottom: '30px',
+  position: 'relative',
+  overflow: 'hidden',
+  transition: 'all 0.5s ease',
+  animation: 'gradientShift 3s ease infinite'
+}
+
+const megaQuizContentStyle = {
+  position: 'relative',
+  zIndex: 2
+}
+
+const megaQuizHeaderStyle = {
+  textAlign: 'center',
+  marginBottom: '25px'
+}
+
+const liveBadgeStyle = {
+  display: 'inline-flex',
+  alignItems: 'center',
+  gap: '8px',
+  background: '#e74c3c',
+  color: 'white',
+  padding: '8px 16px',
+  borderRadius: '20px',
+  fontWeight: 'bold',
+  fontSize: '0.9rem',
+  marginBottom: '15px',
+  position: 'relative'
+}
+
+const livePulseStyle = {
+  width: '12px',
+  height: '12px',
+  backgroundColor: '#fff',
+  borderRadius: '50%',
+  animation: 'pulse 1.5s infinite'
+}
+
+const megaQuizTitleStyle = {
+  fontSize: '2.2rem',
+  fontWeight: 'bold',
+  color: 'white',
+  margin: '10px 0',
+  textShadow: '2px 2px 4px rgba(0,0,0,0.3)'
+}
+
+const megaQuizSubtitleStyle = {
+  fontSize: '1.3rem',
+  color: 'white',
+  margin: '0',
+  opacity: 0.9
+}
+
+const prizesSectionStyle = {
+  display: 'flex',
+  justifyContent: 'center',
+  gap: '20px',
+  margin: '30px 0',
+  flexWrap: 'wrap'
+}
+
+const prizeCardStyle = {
+  background: 'rgba(255, 255, 255, 0.15)',
+  backdropFilter: 'blur(10px)',
+  padding: '20px',
+  borderRadius: '15px',
+  border: '1px solid rgba(255, 255, 255, 0.2)',
+  display: 'flex',
+  alignItems: 'center',
+  gap: '15px',
+  minWidth: '200px',
+  transition: 'transform 0.3s ease'
+}
+
+const prizeIconStyle = {
+  fontSize: '2.5rem'
+}
+
+const prizeInfoStyle = {
+  color: 'white'
+}
+
+const prizeTitleStyle = {
+  margin: '0 0 5px 0',
+  fontSize: '1.1rem',
+  fontWeight: '600'
+}
+
+const prizeAmountStyle = {
+  margin: '0',
+  fontSize: '1rem',
+  opacity: 0.9
+}
+
+const participateButtonStyle = {
+  display: 'block',
+  width: 'max-content',
+  margin: '0 auto',
+  background: 'linear-gradient(45deg, #ff6b6b, #4ecdc4)',
+  color: 'white',
+  padding: '15px 30px',
+  borderRadius: '50px',
+  textDecoration: 'none',
+  fontWeight: 'bold',
+  fontSize: '1.2rem',
+  textAlign: 'center',
+  border: 'none',
+  cursor: 'pointer',
+  transition: 'all 0.3s ease',
+  boxShadow: '0 4px 15px rgba(0, 0, 0, 0.2)'
+}
+
+const participantsSectionStyle = {
+  marginTop: '30px',
+  background: 'rgba(255, 255, 255, 0.1)',
+  borderRadius: '15px',
+  padding: '20px',
+  backdropFilter: 'blur(5px)'
+}
+
+const participantsHeaderStyle = {
+  color: 'white',
+  fontSize: '1.2rem',
+  fontWeight: '600',
+  marginBottom: '15px',
+  display: 'flex',
+  alignItems: 'center',
+  gap: '8px'
+}
+
+const scrollingContainerStyle = {
+  overflow: 'hidden',
+  position: 'relative',
+  borderRadius: '10px'
+}
+
+const scrollingContentStyle = {
+  display: 'flex',
+  animation: 'scrollHorizontal 30s linear infinite',
+  gap: '15px'
+}
+
+const participantCardStyle = {
+  display: 'flex',
+  alignItems: 'center',
+  gap: '10px',
+  background: 'rgba(255, 255, 255, 0.2)',
+  padding: '10px 15px',
+  borderRadius: '25px',
+  minWidth: '180px',
+  backdropFilter: 'blur(5px)'
+}
+
+const participantAvatarStyle = {
+  width: '35px',
+  height: '35px',
+  borderRadius: '50%',
+  background: 'linear-gradient(45deg, #ff6b6b, #4ecdc4)',
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  color: 'white',
+  fontWeight: 'bold',
+  fontSize: '0.9rem'
+}
+
+const participantInfoStyle = {
+  color: 'white'
+}
+
+const participantNameStyle = {
+  fontSize: '0.9rem',
+  fontWeight: '600',
+  margin: '0'
+}
+
+const participantNumberStyle = {
+  fontSize: '0.8rem',
+  opacity: 0.8,
+  margin: '0'
+}
+
+// Existing Styles (keep all your existing styles below)
 const welcomeSectionStyle = {
   marginBottom: '40px'
 }
@@ -373,7 +646,6 @@ const badgeStyle = {
   gap: '5px'
 }
 
-// ✅ New Fields Section Styles
 const fieldsSectionStyle = {
   marginTop: '40px',
   background: 'white',
@@ -401,16 +673,6 @@ const sectionSubtitleStyle = {
   fontSize: '1.1rem',
   color: '#666',
   margin: '0 0 20px 0'
-}
-
-const viewAllButtonStyle = {
-  background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-  color: 'white',
-  padding: '10px 20px',
-  borderRadius: '25px',
-  textDecoration: 'none',
-  fontWeight: '600',
-  display: 'inline-block'
 }
 
 const fieldsGridStyle = {
@@ -471,7 +733,6 @@ const emptyFieldsStyle = {
   fontSize: '1.1rem'
 }
 
-// ✅ Admin Section Styles
 const adminSectionStyle = {
   marginTop: '40px',
   padding: '25px',
@@ -526,7 +787,6 @@ const adminCardTextStyle = {
   margin: 0
 }
 
-// Contact Support Styles
 const contactSupportStyle = {
   marginTop: '40px',
   background: '#f7f7f7',
@@ -566,4 +826,31 @@ const contactButtonStyle = {
   textAlign: 'center',
   width: '200px',
   display: 'block'
+}
+
+// Add CSS animations
+const styles = `
+@keyframes pulse {
+  0% { transform: scale(0.95); opacity: 0.7; }
+  50% { transform: scale(1.1); opacity: 1; }
+  100% { transform: scale(0.95); opacity: 0.7; }
+}
+
+@keyframes scrollHorizontal {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+
+@keyframes gradientShift {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+`
+
+// Add styles to document
+if (typeof document !== 'undefined') {
+  const styleSheet = document.createElement("style")
+  styleSheet.innerText = styles
+  document.head.appendChild(styleSheet)
 }
