@@ -9,6 +9,7 @@ import Dashboard from './pages/Dashboard.jsx'
 import AdminFieldsPage from './pages/AdminFieldsPage'
 import AdminAddQuestion from './pages/AdminAddQuestion'
 import FieldQuestionsPage from './pages/FieldQuestionsPage'
+import AdminPayment from './pages/AdminPayment.jsx'
 
 
 // student dashboard stays at /dashboard (your existing)
@@ -39,6 +40,8 @@ function App() {
         <Route path="/field/que/:fieldId" element={<FieldQuestionsPage />} />
         <Route path="/admin/add-question" element={<AdminAddQuestion />} />
         <Route path="/admin/fields" element={<AdminFieldsPage />} />
+        <Route path="/admin/payment" element={<AdminPayment />} />
+
         <Route path="*" element={<Navigate to="/" />} />
       </Routes>
     </BrowserRouter>

@@ -3,7 +3,7 @@ import api from '../utils/axios'
 import { Link } from 'react-router-dom'
 import { LogoutButton } from '../components/authCommon'
 import Navbar from '../components/navbar'
-
+import qrimg from "../image/qr.png"
 // Simple icon components using emojis
 const QuizIcon = () => <span style={{ fontSize: '20px' }}>📝</span>
 const TrophyIcon = () => <span style={{ fontSize: '20px' }}>🏆</span>
@@ -16,6 +16,7 @@ const AssignmentIcon = () => <span style={{ fontSize: '20px' }}>📋</span>
 const CalendarIcon = () => <span style={{ fontSize: '20px' }}>📅</span>
 const WhatsAppIcon = () => <span style={{ fontSize: '20px' }}>💬</span>
 const EmailIcon = () => <span style={{ fontSize: '20px' }}>📧</span>
+
 
 export default function Dashboard() {
   const [me, setMe] = useState(null)
@@ -32,6 +33,35 @@ export default function Dashboard() {
   const [hoveredButton, setHoveredButton] = useState(null)
   const [loading, setLoading] = useState(false)
   const [isBlinking, setIsBlinking] = useState(true)
+  const [isModalOpen, setIsModalOpen] = useState(false);
+const [image, setImage] = useState(null); // Image to upload
+  const [number, setNumber] = useState(''); // 16-digit number
+  
+useEffect(() => {
+    (async () => {
+      try {
+        setLoading(true);
+        const { data: userData } = await api.get('/auth/me');
+        setMe(userData?.user);
+
+        const { data: fieldsData } = await api.get('/admin/fields');
+        setFields(fieldsData || []);
+      } catch (error) {
+        console.error('Error fetching dashboard data:', error);
+      } finally {
+        setLoading(false);
+      }
+    })();
+  }, []);
+    const handleOpenModal = () => {
+    setIsModalOpen(true);
+  };
+
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+  };
+
+  
 
   // Mock participant data with masked numbers
   const participants = [
@@ -123,14 +153,47 @@ export default function Dashboard() {
   const handleMouseLeave = () => {
     setHoveredButton(null)
   }
+const handleSubmit = async () => {
+  if (number.length === 16) {  // Ensure the number is exactly 16 digits long
+    // Validate the number format (only digits)
+    const isValidNumber = /^[0-9]{16}$/.test(number);
+    if (!isValidNumber) {
+      alert('Please enter a valid 16-digit number (only digits allowed).');
+      return;
+    }
+
+    // Prepare the JSON object
+    const data = {
+      utr: number,  // 16-digit number
+    };
+
+    // Add user ID if available
+    if (me?._id) {
+      data.user_id = me._id;
+    }
+
+    try {
+      // Make the POST request to the API endpoint with JSON data
+      const response = await api.post('/payment/create', data, {
+        headers: {
+          'Content-Type': 'application/json',  // Ensure the server knows you're sending JSON
+        },
+      });
+
+      console.log('Form submitted successfully:', response.data);
+      setIsModalOpen(false); // Close modal after submission
+    } catch (error) {
+      console.error('Error submitting form:', error);
+    }
+  } else {
+    alert('Please enter a valid 16-digit number.');
+  }
+};
 
   return (
     <>
       <Navbar />
       <div style={containerStyle}>
-       {/* Mega Quiz Live Banner */}
-        
-
         {/* Welcome Section */}
         <div style={welcomeSectionStyle}>
           <div style={userInfoStyle}>
@@ -192,10 +255,39 @@ export default function Dashboard() {
               
             </div>
 
-            <Link to="/mega-quiz" style={participateButtonStyle}>
+             <Link onClick={handleOpenModal} style={participateButtonStyle}>
               🚀 Participate Now 🚀
             </Link>
-
+{isModalOpen && (
+          <div style={modalOverlayStyle}>
+            <div style={modalContentStyle}>
+              <button style={closeModalButtonStyle} onClick={handleCloseModal}>
+                X
+              </button>
+              <h2>Participate in the Mega Quiz</h2>
+              <div style={formContainerStyle}>
+                <h3>Scan the QR code And Pay 100 RS</h3>
+              <img
+                src= {qrimg}
+                alt="Static Image"
+                style={{ width: '150px', marginTop: '10px' }}
+              />
+                <p>Enter 16-digit UTR Number</p>
+                <input
+                  type="text"
+                  maxLength="16"
+                  placeholder="Enter 16-digit number"
+                  value={number}
+                  onChange={(e) => setNumber(e.target.value)}
+                  style={inputStyle}
+                />
+                <button onClick={handleSubmit} style={submitButtonStyle}>
+                  Submit
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
             {/* Participants Scrolling Section */}
             <div style={participantsSectionStyle}>
               <div style={participantsHeaderStyle}>
@@ -349,6 +441,17 @@ export default function Dashboard() {
     </>
   )
 }
+// Modal Styles
+const modalOverlayStyle = { position: 'fixed',
+   top: '0', left: '0', width: '100%', height: '100%',
+    backgroundColor: 'rgba(0, 0, 0, 0.5)', display: 'flex',
+     justifyContent: 'center', alignItems: 'center' ,zIndex: 1000};
+const modalContentStyle = { background: 'white', padding: '20px', borderRadius: '10px', width: '400px', textAlign: 'center', position: 'relative' };
+const closeModalButtonStyle = { position: 'absolute', top: '10px', right: '10px', fontSize: '1.5rem', background: 'none', border: 'none', cursor: 'pointer' };
+const formContainerStyle = { marginTop: '20px' };
+const inputStyle = { width: '100%', padding: '10px', margin: '10px 0', borderRadius: '5px', border: '1px solid #ccc' };
+const submitButtonStyle = { background: '#4ecdc4', color: 'white', padding: '12px 20px', borderRadius: '5px', border: 'none', cursor: 'pointer', fontSize: '1rem' };
+
 
 // Enhanced Styles with Mega Quiz Section
 const containerStyle = {

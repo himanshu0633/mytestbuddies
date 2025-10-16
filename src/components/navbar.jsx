@@ -86,6 +86,7 @@ const Navbar = () => {
           <>
             <Link to="/admin/fields" style={styles.navLink}>Manage Fields</Link>
             <Link to="/admin/add-question" style={styles.navLink}>Add Question</Link>
+            <Link to="/admin/payment" style={styles.navLink}>Manage Payments</Link>
           </>
         )}
 
