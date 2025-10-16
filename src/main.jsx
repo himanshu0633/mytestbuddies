@@ -38,6 +38,7 @@ function App() {
         <Route path="/field/que" element={<FieldQuestionsPage />} />
         <Route path="/field/que/:fieldId" element={<FieldQuestionsPage />} />
         <Route path="/admin/add-question" element={<AdminAddQuestion />} />
+        <Route path="/admin/fields" element={<AdminFieldsPage />} />
         <Route path="*" element={<Navigate to="/" />} />
       </Routes>
     </BrowserRouter>

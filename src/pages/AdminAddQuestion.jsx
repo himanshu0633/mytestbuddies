@@ -34,9 +34,12 @@ export default function AdminAddQuestion() {
 
     try {
       setLoading(true);  // Show loading spinner while request is being made
-      const { data } = await api.post(`/admin/questions/fields/questions`, payload);  // Correct URL
-      alert('✅ Question created successfully!');
+    
 
+
+
+      const { data } = await api.post(`/admin/questions/fields/${fieldId}/questions`, payload);
+alert('✅ Question created successfully!');
       // Reset form after successful question creation
       setText('');
       setOptions(['', '', '', '']);
