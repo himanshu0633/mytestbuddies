@@ -3,6 +3,7 @@ import { useParams } from "react-router-dom";
 import api from "../utils/axios";
 import { useNavigate } from "react-router-dom";
 
+
 const FieldQuestionsPage = () => {
   const { fieldId } = useParams();
   const [questions, setQuestions] = useState([]);
@@ -10,17 +11,21 @@ const FieldQuestionsPage = () => {
   const [loading, setLoading] = useState(true);
   const [submitted, setSubmitted] = useState(false);
   const [quizStarted, setQuizStarted] = useState(false);
-  const [timeLeft, setTimeLeft] = useState(30 * 60); // 30 minutes in seconds
+  const [timeLeft, setTimeLeft] = useState(30 * 60);
   const [userName, setUserName] = useState("");
-  const [progress, setProgress] = useState(null); // For storing the progress result
+  const [progress, setProgress] = useState(null);
   const navigate = useNavigate(); 
 
   useEffect(() => {
     const fetchQuestions = async () => {
       try {
         const res = await api.get(`/admin/questions/fields/que/${fieldId}`);
-        setQuestions(res.data.questions || []);
-        setAnswers(res.data.questions.map(() => ""));
+        if (res.data?.questions) {
+          setQuestions(res.data.questions);
+          setAnswers(res.data.questions.map(() => ""));
+        } else {
+          console.error("Questions data is missing");
+        }
       } catch (err) {
         console.error("Error fetching questions", err);
       } finally {
@@ -77,13 +82,12 @@ const FieldQuestionsPage = () => {
 
       if (res.data.success) {
         setSubmitted(true);
-        // After successful submission, get the progress
         const progressRes = await api.get(`/admin/questions/fields/progress/${fieldId}`);
-        setProgress(progressRes.data.progress); // Store the progress result
+        setProgress(progressRes.data.progress);
       }
     } catch (err) {
       console.error("Error auto-submitting answers", err);
-      setSubmitted(true); // Still mark as submitted even if API fails
+      setSubmitted(true);
     }
   };
 
@@ -100,18 +104,18 @@ const FieldQuestionsPage = () => {
     return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
   };
 
-  // Progress calculation
   const answeredCount = answers.filter(answer => answer !== "").length;
   const progressPercentage = questions.length > 0 ? (answeredCount / questions.length) * 100 : 0;
 
-  // Function to filter and get the latest question for each question ID
   const getLatestQuestions = (questionsAnswered) => {
-    const latestQuestions = {};
+    if (!Array.isArray(questionsAnswered)) {
+      console.error("Invalid questionsAnswered data", questionsAnswered);
+      return [];
+    }
 
+    const latestQuestions = {};
     questionsAnswered.forEach((qa) => {
       const questionId = qa.question._id;
-
-      // Only store the question if it's the first one or it has a later createdAt date
       if (!latestQuestions[questionId] || new Date(qa.question.createdAt) > new Date(latestQuestions[questionId].question.createdAt)) {
         latestQuestions[questionId] = qa;
       }
@@ -130,56 +134,147 @@ const FieldQuestionsPage = () => {
   }
 
   if (submitted && progress) {
-    const filteredQuestions = getLatestQuestions(progress.questionsAnswered); // Filter for latest questions
+    const filteredQuestions = getLatestQuestions(progress.questionsAnswered);
+    const scorePercentage = Math.floor((progress.totalCorrect / progress.totalAnswered) * 100) || 0;
+    
+    const getPerformanceData = (score) => {
+      if (score >= 90) return { level: "Excellent", color: "#10b981", emoji: "🎯", bgColor: "#f0fdf4" };
+      if (score >= 80) return { level: "Great", color: "#3b82f6", emoji: "🌟", bgColor: "#f0f9ff" };
+      if (score >= 70) return { level: "Good", color: "#8b5cf6", emoji: "👍", bgColor: "#faf5ff" };
+      if (score >= 60) return { level: "Average", color: "#f59e0b", emoji: "📚", bgColor: "#fffbeb" };
+      return { level: "Needs Improvement", color: "#ef4444", emoji: "💪", bgColor: "#fef2f2" };
+    };
+
+    const performance = getPerformanceData(scorePercentage);
 
     return (
-      <div className="submission-success">
-        <div className="success-icon">🎉</div>
-        <h2>Quiz Submitted Successfully!</h2>
-        <p>Thank you, {userName}! Your answers have been recorded.</p>
+      <div className="submission-success-container">
+        <div className="success-header">
+          <div className="success-animation">
+            <div className="checkmark">✓</div>
+          </div>
+          <h1>Quiz Submitted Successfully!</h1>
+          <p className="success-message">
+            Thank you, <span className="user-name-highlight">{userName}</span>! Your answers have been recorded.
+          </p>
+        </div>
 
-        {/* Show Progress */}
-        <div className="result-container">
-          <h3>Quiz Result</h3>
-          <div className="result-details">
-            <p><strong>Total Questions Answered:</strong> {progress.totalAnswered}</p>
-            <p><strong>Correct Answers:</strong> {progress.totalCorrect}</p>
-            <p><strong>Score:</strong> {Math.floor((progress.totalCorrect / progress.totalAnswered) * 100)}%</p>
+        <div className="performance-overview">
+          <div className="score-card" style={{ borderColor: performance.color, backgroundColor: performance.bgColor }}>
+            <div className="score-circle">
+              <div 
+                className="score-progress" 
+                style={{ 
+                  background: `conic-gradient(${performance.color} ${scorePercentage * 3.6}deg, #e5e7eb 0deg)` 
+                }}
+              >
+                <div className="score-inner">
+                  <span className="score-percentage">{scorePercentage}%</span>
+                </div>
+              </div>
+            </div>
+            <div className="performance-info">
+              <h3 style={{ color: performance.color }}>
+                {performance.emoji} {performance.level}
+              </h3>
+              <div className="performance-stats">
+                <div className="stat-item">
+                  <span className="stat-value" style={{ color: performance.color }}>{progress.totalCorrect}</span>
+                  <span className="stat-label">Correct</span>
+                </div>
+                <div className="stat-item">
+                  <span className="stat-value" style={{ color: "#ef4444" }}>{progress.totalAnswered - progress.totalCorrect}</span>
+                  <span className="stat-label">Incorrect</span>
+                </div>
+                <div className="stat-item">
+                  <span className="stat-value" style={{ color: "#6b7280" }}>{progress.totalAnswered}</span>
+                  <span className="stat-label">Total</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div className="detailed-results">
+          <div className="results-header">
+            <h2>Detailed Results</h2>
+            <div className="results-summary">
+              <span className="summary-item correct-summary">
+                <span className="indicator correct-indicator"></span>
+                Correct: {progress.totalCorrect}
+              </span>
+              <span className="summary-item incorrect-summary">
+                <span className="indicator incorrect-indicator"></span>
+                Incorrect: {progress.totalAnswered - progress.totalCorrect}
+              </span>
+            </div>
           </div>
 
-          <div className="answered-questions">
-            <h4>Answered Questions</h4>
-            {filteredQuestions.length > 0 ? (
+          <div className="questions-review">
+            {filteredQuestions?.length > 0 ? (
               filteredQuestions.map((qa, index) => (
-                <div key={qa._id} className="question-result">
-                  <div className="question-text">
-                    <strong>Q{index + 1}:</strong> {qa.question.text}
+                <div 
+                  key={qa._id} 
+                  className={`question-review-card ${qa.isCorrect ? 'correct' : 'incorrect'}`}
+                >
+                  <div className="question-review-header">
+                    <div className="question-number-badge">
+                      Q{index + 1}
+                    </div>
+                    <div className="result-status">
+                      {qa.isCorrect ? (
+                        <span className="status-correct">✓ Correct</span>
+                      ) : (
+                        <span className="status-incorrect">✗ Incorrect</span>
+                      )}
+                    </div>
                   </div>
-                  <div className="user-answer">
-                    <strong>Your Answer:</strong> {qa.answer} 
-                    {qa.isCorrect ? (
-                      <span className="correct">✔ Correct</span>
-                    ) : (
-                      <span className="incorrect">✘ Incorrect</span>
-                    )}
-                  </div>
-                  <div className="correct-answer">
-                    <strong>Correct Answer:</strong> {qa.question.options[parseInt(qa.question.correctAnswer)].text}
+                  
+                  <div className="question-content">
+                    <p className="question-text">{qa.question.text}</p>
+                    
+                    <div className="answer-comparison">
+                      <div className="answer-section">
+                        <span className="answer-label">Your Answer:</span>
+                        <p className={`user-answer ${qa.isCorrect ? 'correct' : 'incorrect'}`}>
+                          {qa.answer || "No answer provided"}
+                        </p>
+                      </div>
+                      
+                      {!qa.isCorrect && (
+                        <div className="answer-section">
+                          <span className="answer-label">Correct Answer:</span>
+                          <p className="correct-answer">
+                            {qa.question.options?.[parseInt(qa.question.correctAnswer)]?.text || 'N/A'}
+                          </p>
+                        </div>
+                      )}
+                    </div>
                   </div>
                 </div>
               ))
             ) : (
-              <p>No questions answered.</p>
+              <div className="no-answers">
+                <p>No questions were answered.</p>
+              </div>
             )}
           </div>
         </div>
 
-        <button
-      className="home-button"
-      onClick={() => navigate("/dashboard")} // Navigate to the dashboard
-    >
-      Back to Home
-    </button>
+        <div className="action-buttons">
+          <button
+            className="home-button primary"
+            onClick={() => navigate("/dashboard")}
+          >
+            🏠 Back to Home
+          </button>
+          <button
+            className="home-button secondary"
+            onClick={() => window.location.reload()}
+          >
+            🔄 Retake Quiz
+          </button>
+        </div>
       </div>
     );
   }
@@ -189,34 +284,44 @@ const FieldQuestionsPage = () => {
       <div className="quiz-start-modal">
         <div className="quiz-start-card">
           <div className="quiz-header">
-            <h1>📝 Quiz Instructions</h1>
+            <div className="header-icon">📝</div>
+            <h1>Quiz Instructions</h1>
+            <p>Get ready to test your knowledge!</p>
           </div>
+          
           <div className="quiz-info">
             <div className="info-item">
               <span className="info-icon">⏱️</span>
-              <div>
+              <div className="info-content">
                 <strong>Time Limit</strong>
-                <p>30 minutes</p>
+                <p>30 minutes to complete all questions</p>
               </div>
             </div>
             <div className="info-item">
               <span className="info-icon">❓</span>
-              <div>
+              <div className="info-content">
                 <strong>Total Questions</strong>
-                <p>{questions.length} questions</p>
+                <p>{questions.length} questions to answer</p>
               </div>
             </div>
             <div className="info-item">
               <span className="info-icon">⚠️</span>
-              <div>
+              <div className="info-content">
                 <strong>Important</strong>
-                <p>Timer starts when you click "Start Quiz"</p>
+                <p>Timer starts immediately when you begin</p>
+              </div>
+            </div>
+            <div className="info-item">
+              <span className="info-icon">🎯</span>
+              <div className="info-content">
+                <strong>Scoring</strong>
+                <p>Immediate results with detailed feedback</p>
               </div>
             </div>
           </div>
 
           <div className="name-input-container">
-            <label htmlFor="userName">Enter Your Name:</label>
+            <label htmlFor="userName" className="input-label">Enter Your Name</label>
             <input
               id="userName"
               type="text"
@@ -230,9 +335,9 @@ const FieldQuestionsPage = () => {
           <button
             onClick={handleStartQuiz}
             disabled={!userName.trim()}
-            className="start-quiz-btn"
+            className={`start-quiz-btn ${!userName.trim() ? 'disabled' : ''}`}
           >
-            Start Quiz
+            🚀 Start Quiz Now
           </button>
         </div>
       </div>
@@ -241,104 +346,130 @@ const FieldQuestionsPage = () => {
 
   return (
     <div className="quiz-container">
-      {/* Header */}
       <div className="quiz-header-sticky">
         <div className="header-content">
           <div className="quiz-info-bar">
             <div className="info-section">
-              <span className="user-info">👤 {userName}</span>
-              <span className="timer">
-                ⏰ {formatTime(timeLeft)}
-                {timeLeft < 300 && <span className="time-warning"> (Hurry!)</span>}
-              </span>
+              <div className="user-info">
+                <span className="info-emoji">👤</span>
+                <span className="info-text">{userName}</span>
+              </div>
+              <div className="timer-container">
+                <span className="timer-emoji">⏰</span>
+                <span className={`timer ${timeLeft < 300 ? 'warning' : ''}`}>
+                  {formatTime(timeLeft)}
+                  {timeLeft < 300 && <span className="time-warning"> (Hurry!)</span>}
+                </span>
+              </div>
             </div>
             <div className="progress-section">
+              <div className="progress-info">
+                <span className="progress-text">
+                  {answeredCount}/{questions.length} answered
+                </span>
+                <span className="progress-percentage">{Math.round(progressPercentage)}%</span>
+              </div>
               <div className="progress-bar">
                 <div
                   className="progress-fill"
                   style={{ width: `${progressPercentage}%` }}
                 ></div>
               </div>
-              <span className="progress-text">
-                {answeredCount}/{questions.length} answered
-              </span>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Questions */}
       <div className="questions-container">
-        <h2 className="quiz-title">Quiz Questions</h2>
+        <div className="quiz-title-section">
+          <h2 className="quiz-title">Quiz Questions</h2>
+          <div className="quiz-stats">
+            <span className="stat">Total: {questions.length}</span>
+            <span className="stat">Answered: {answeredCount}</span>
+            <span className="stat">Remaining: {questions.length - answeredCount}</span>
+          </div>
+        </div>
 
         {questions.length === 0 ? (
           <div className="no-questions">
+            <div className="no-questions-icon">❓</div>
             <p>No questions found for this quiz.</p>
           </div>
         ) : (
-          questions.map((q, i) => (
-            <div key={q._id} className="question-card">
-              <div className="question-header">
-                <span className="question-number">Question {i + 1}</span>
-                <span className="question-type">{q.type.toUpperCase()}</span>
-              </div>
-
-              <h3 className="question-text">{q.text}</h3>
-
-              {q.type === "mcq" ? (
-                <div className="options-container">
-                  {q.options.map((opt, j) => (
-                    <label key={j} className="option-label">
-                      <input
-                        type="radio"
-                        name={q._id}
-                        value={opt.text}
-                        checked={answers[i] === opt.text}
-                        onChange={(e) => handleAnswerChange(q._id, e.target.value)}
-                        className="option-input"
-                      />
-                      <span className="custom-radio"></span>
-                      {opt.text}
-                    </label>
-                  ))}
+          <div className="questions-grid">
+            {questions.map((q, i) => (
+              <div key={q._id} className="question-card">
+                <div className="question-header">
+                  <span className="question-number">Question {i + 1}</span>
+                  <span className={`question-type ${q.type}`}>{q.type.toUpperCase()}</span>
                 </div>
-              ) : (
-                <div className="text-answer-container">
-                  <textarea
-                    rows="4"
-                    value={answers[i]}
-                    onChange={(e) => handleAnswerChange(q._id, e.target.value)}
-                    placeholder="Type your answer here..."
-                    className="text-answer"
-                  />
-                </div>
-              )}
 
-              <div className="answer-status">
-                {answers[i] ? (
-                  <span className="answered-badge">✓ Answered</span>
+                <h3 className="question-text">{q.text}</h3>
+
+                {q.type === "mcq" ? (
+                  <div className="options-container">
+                    {q.options?.map((opt, j) => (
+                      <label key={j} className="option-label">
+                        <input
+                          type="radio"
+                          name={q._id}
+                          value={opt.text}
+                          checked={answers[i] === opt.text}
+                          onChange={(e) => handleAnswerChange(q._id, e.target.value)}
+                          className="option-input"
+                        />
+                        <span className="custom-radio"></span>
+                        <span className="option-text">{opt.text}</span>
+                      </label>
+                    ))}
+                  </div>
                 ) : (
-                  <span className="unanswered-badge">⏳ Not answered</span>
+                  <div className="text-answer-container">
+                    <textarea
+                      rows="4"
+                      value={answers[i]}
+                      onChange={(e) => handleAnswerChange(q._id, e.target.value)}
+                      placeholder="Type your detailed answer here..."
+                      className="text-answer"
+                    />
+                  </div>
                 )}
+
+                <div className="answer-status">
+                  {answers[i] ? (
+                    <span className="answered-badge">✓ Answered</span>
+                  ) : (
+                    <span className="unanswered-badge">⏳ Not answered</span>
+                  )}
+                </div>
               </div>
-            </div>
-          ))
+            ))}
+          </div>
         )}
       </div>
 
-      {/* Submit Button */}
       <div className="submit-section">
-        <button
-          onClick={handleSubmit}
-          disabled={answeredCount === 0}
-          className={`submit-btn ${answeredCount === 0 ? "disabled" : ""}`}
-        >
-          Submit Quiz ({answeredCount}/{questions.length})
-        </button>
-
-        <div className="time-remaining">
-          Time remaining: <strong>{formatTime(timeLeft)}</strong>
+        <div className="submit-content">
+          <button
+            onClick={handleSubmit}
+            disabled={answeredCount === 0}
+            className={`submit-btn ${answeredCount === 0 ? "disabled" : "active"}`}
+          >
+            <span className="submit-icon">📤</span>
+            Submit Quiz ({answeredCount}/{questions.length})
+          </button>
+          
+          <div className="time-remaining">
+            <span className="time-label">Time remaining:</span>
+            <strong className="time-value">{formatTime(timeLeft)}</strong>
+          </div>
         </div>
+        
+        {answeredCount === 0 && (
+          <div className="submit-warning">
+            ⚠️ Please answer at least one question to submit
+          </div>
+        )}
       </div>
     </div>
   );
